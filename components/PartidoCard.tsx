@@ -98,17 +98,19 @@ export function PartidoCard({ partido, showResultInput = false }: Props) {
           {/* Botones 1 X 2 */}
           {!showResultInput && (
             <div style={{ display: 'flex', gap: 4 }}>
-              {(['1', 'X', '2'] as const).map(v => (
-                <button
-                  key={v}
-                  className={`pred-btn${pred === v ? ` active-${v.toLowerCase()}` : ''}`}
-                  onClick={() => puedeApostar && setPredicion(partido.id, v)}
-                  disabled={!puedeApostar}
-                  style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'pointer' }}
-                >
-                  {v}
-                </button>
-              ))}
+              {(['1', 'X', '2'] as const)
+  .filter(v => partido.fase === 'grupos' || v !== 'X')
+  .map(v => (
+    <button
+      key={v}
+      className={`pred-btn${pred === v ? ` active-${v.toLowerCase()}` : ''}`}
+      onClick={() => puedeApostar && setPredicion(partido.id, v)}
+      disabled={!puedeApostar}
+      style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'pointer' }}
+    >
+      {v}
+    </button>
+ ))}
             </div>
           )}
         </div>
