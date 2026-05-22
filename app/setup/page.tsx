@@ -1,32 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-import { useProdeStore } from '@/lib/store';
+import { useState, useEffect } from 'react';
+
+interface Jugador {
+  id: string;
+  nombre: string;
+  color: string;
+  esAdmin: boolean;
+}
 
 export default function Setup() {
-  const { addJugador, jugadores } = useProdeStore();
   const [nombre, setNombre] = useState('');
   const [dni, setDni] = useState('');
   const [esAdmin, setEsAdmin] = useState(false);
   const [msg, setMsg] = useState('');
+  const [jugadores, setJugadores] = useState<Jugador[]>([]);
 
-  function handleAdd() {
+  async function cargarJugadores() {
+    const res = await fetch('/api/usuarios');
+    const data = await res.json();
+    setJugadores(data);
+  }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+useEffect(() => { void cargarJugadores(); }, []);
+
+  async function handleAdd() {
     if (!nombre.trim() || dni.length !== 4) {
-      setMsg('Nombre y 4 dígitos de DNI requeridos');
+      setMsg('❌ Nombre y 4 dígitos de DNI requeridos');
       return;
     }
-    addJugador(nombre, dni, esAdmin);
+    const res = await fetch('/api/usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, dni, esAdmin }),
+    });
+    const data = await res.json();
+    if (data.error) { setMsg(`❌ ${data.error}`); return; }
     setMsg(`✓ ${nombre} agregado`);
     setNombre('');
     setDni('');
     setEsAdmin(false);
+    cargarJugadores();
+  }
+
+  async function handleDelete(id: string) {
+    await fetch('/api/usuarios', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    cargarJugadores();
   }
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0E1A', padding: 32, color: '#F0F4FF', fontFamily: 'sans-serif' }}>
-      <h1 style={{ color: '#C9A84C', marginBottom: 24 }}>⚙️ Setup — Agregar participantes</h1>
+      <h1 style={{ color: '#C9A84C', marginBottom: 8 }}>⚙️ Setup — Participantes</h1>
+      <p style={{ color: '#8899BB', marginBottom: 24, fontSize: 13 }}>Esta página solo la usa el admin para cargar los jugadores.</p>
 
-      <div style={{ maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <input
           value={nombre}
           onChange={e => setNombre(e.target.value)}
@@ -40,7 +72,7 @@ export default function Setup() {
           maxLength={4}
           style={{ height: 44, padding: '0 14px', borderRadius: 8, border: '1px solid #333', background: '#111827', color: '#fff', fontSize: 15 }}
         />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
           <input type="checkbox" checked={esAdmin} onChange={e => setEsAdmin(e.target.checked)} />
           Es admin
         </label>
@@ -50,23 +82,19 @@ export default function Setup() {
         >
           AGREGAR
         </button>
-        {msg && <div style={{ color: '#00D46A', fontWeight: 600 }}>{msg}</div>}
+        {msg && <div style={{ color: msg.startsWith('❌') ? '#FF6B6B' : '#00D46A', fontWeight: 600 }}>{msg}</div>}
       </div>
 
-      <div style={{ marginTop: 40 }}>
-        <h2 style={{ marginBottom: 16, color: '#8899BB' }}>Participantes cargados ({jugadores.length})</h2>
+      <div style={{ marginTop: 40, maxWidth: 400 }}>
+        <h2 style={{ marginBottom: 12, color: '#8899BB', fontSize: 16 }}>Jugadores cargados ({jugadores.length})</h2>
         {jugadores.map(j => (
-          <div key={j.id} style={{ padding: '8px 14px', background: '#111827', borderRadius: 8, marginBottom: 6, display: 'flex', gap: 12, alignItems: 'center' }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: j.color }} />
-            <span style={{ fontWeight: 600 }}>{j.nombre}</span>
-            {j.esAdmin && <span style={{ color: '#C9A84C', fontSize: 12 }}>ADMIN</span>}
+          <div key={j.id} style={{ padding: '10px 14px', background: '#111827', borderRadius: 8, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: j.color, flexShrink: 0 }} />
+            <span style={{ fontWeight: 600, flex: 1 }}>{j.nombre}</span>
+            {j.esAdmin && <span style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700 }}>ADMIN</span>}
+            <button onClick={() => handleDelete(j.id)} style={{ background: 'none', border: 'none', color: '#FF6B6B', cursor: 'pointer', fontSize: 18 }}>×</button>
           </div>
         ))}
-      </div>
-
-      <div style={{ marginTop: 40, color: '#8899BB', fontSize: 13 }}>
-        Una vez cargados todos, esta página no la uses más.<br/>
-        URL: <strong>/setup</strong>
       </div>
     </div>
   );
