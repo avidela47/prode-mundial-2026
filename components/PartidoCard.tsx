@@ -2,7 +2,7 @@
 
 import { FlagImg } from './FlagImg';
 import { useProdeStore } from '@/lib/store';
-import { estaBloquado, type Partido } from '@/lib/fixture';
+import { getEstadoApuesta, horaApertura, type Partido } from '@/lib/fixture';
 
 interface Props {
   partido: Partido;
@@ -14,7 +14,8 @@ export function PartidoCard({ partido, showResultInput = false }: Props) {
 
   const pred = jugadorActivo ? (predicciones[jugadorActivo.id]?.[partido.id] || '') : '';
   const resultado = resultados[partido.id];
-  const bloqueado = estaBloquado(partido);
+  const estado = getEstadoApuesta(partido);
+const bloqueado = estado !== 'abierto';
 
   let resReal: '1' | 'X' | '2' | null = null;
   if (resultado) {
@@ -26,6 +27,10 @@ export function PartidoCard({ partido, showResultInput = false }: Props) {
   const isCorrect = pred && resReal && pred === resReal;
   const isWrong = pred && resReal && pred !== resReal;
   const puedeApostar = jugadorActivo && !showResultInput && (!bloqueado || jugadorActivo.esAdmin);
+
+const mensajeBloqueo = estado === 'muy_temprano'
+  ? `Apostá a partir de las ${horaApertura(partido)}`
+  : 'Apuestas cerradas';
 
   function handleScore(side: 'local' | 'visita', val: string) {
     const num = parseInt(val);
@@ -53,8 +58,10 @@ export function PartidoCard({ partido, showResultInput = false }: Props) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {bloqueado && !resReal && (
-            <span style={{ fontSize: 10, color: '#FF6B00', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>🔒</span>
-          )}
+  <span style={{ fontSize: 10, color: '#FF6B00', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
+    🔒 {mensajeBloqueo}
+  </span>
+)}
           <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{partido.sede}</span>
         </div>
       </div>

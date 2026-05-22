@@ -30,12 +30,31 @@ export const PUNTOS_FASE: Record<Fase, number> = {
   'final':      10,
 };
 
-// Bloqueo: 2hs antes del partido en hora Argentina (UTC-3)
-export function estaBloquado(partido: Partido): boolean {
+// Retorna el estado del partido para apuestas
+export type EstadoApuesta = 'muy_temprano' | 'abierto' | 'cerrado';
+
+export function getEstadoApuesta(partido: Partido): EstadoApuesta {
   const ahora = new Date();
   const inicio = new Date(partido.fechaISO);
-  const dosHorasAntes = new Date(inicio.getTime() - 2 * 60 * 60 * 1000);
-  return ahora >= dosHorasAntes;
+  const seis = new Date(inicio.getTime() - 6 * 60 * 60 * 1000);
+  const dos = new Date(inicio.getTime() - 2 * 60 * 60 * 1000);
+
+  if (ahora < seis) return 'muy_temprano';
+  if (ahora >= seis && ahora < dos) return 'abierto';
+  return 'cerrado';
+}
+
+// Para compatibilidad con el código existente
+export function estaBloquado(partido: Partido): boolean {
+  const estado = getEstadoApuesta(partido);
+  return estado !== 'abierto';
+}
+
+// Hora Argentina formateada
+export function horaApertura(partido: Partido): string {
+  const inicio = new Date(partido.fechaISO);
+  const apertura = new Date(inicio.getTime() - 6 * 60 * 60 * 1000);
+  return apertura.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
 }
 
 export const EQUIPOS: Record<string, Equipo> = {
