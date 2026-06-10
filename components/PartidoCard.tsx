@@ -110,7 +110,7 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
           )}
 
           {/* Inputs predicción */}
-          {!showResultInput && !resultado && (
+          {!showResultInput && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <input
                 className="score-input"
