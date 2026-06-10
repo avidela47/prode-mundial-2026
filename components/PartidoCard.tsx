@@ -2,7 +2,7 @@
 
 import { FlagImg } from './FlagImg';
 import { useProdeStore } from '@/lib/store';
-import { getEstadoApuesta, horaApertura, type Partido } from '@/lib/fixture';
+import { getEstadoApuesta, horaCierre, type Partido } from '@/lib/fixture';
 
 interface Props {
   partido: Partido;
@@ -12,25 +12,39 @@ interface Props {
 export function PartidoCard({ partido, showResultInput = false }: Props) {
   const { jugadorActivo, predicciones, resultados, setPredicion, setResultado } = useProdeStore();
 
-  const pred = jugadorActivo ? (predicciones[jugadorActivo.id]?.[partido.id] || '') : '';
+  const predRaw = jugadorActivo ? (predicciones[jugadorActivo.id]?.[partido.id] || '') : '';
+  // prediccion guardada como "gl-gv" ej: "2-1"
+  const [predGl, predGv] = predRaw.includes('-') ? predRaw.split('-').map(Number) : [null, null];
+
   const resultado = resultados[partido.id];
   const estado = getEstadoApuesta(partido);
-const bloqueado = estado !== 'abierto';
-
-  let resReal: '1' | 'X' | '2' | null = null;
-  if (resultado) {
-    if (resultado.gl > resultado.gv) resReal = '1';
-    else if (resultado.gl === resultado.gv) resReal = 'X';
-    else resReal = '2';
-  }
-
-  const isCorrect = pred && resReal && pred === resReal;
-  const isWrong = pred && resReal && pred !== resReal;
+  const bloqueado = estado !== 'abierto';
   const puedeApostar = jugadorActivo && !showResultInput && (!bloqueado || jugadorActivo.esAdmin);
 
-const mensajeBloqueo = estado === 'muy_temprano'
-  ? `Apostá a partir de las ${horaApertura(partido)}`
-  : 'Apuestas cerradas';
+  // Calcular signo de la predicción
+  function signo(gl: number | null, gv: number | null): '1' | 'X' | '2' | null {
+    if (gl === null || gv === null) return null;
+    if (gl > gv) return '1';
+    if (gl === gv) return 'X';
+    return '2';
+  }
+
+  const signoPred = signo(predGl, predGv);
+  const signoReal = resultado ? signo(resultado.gl, resultado.gv) : null;
+
+  const esExacto = resultado && predRaw === `${resultado.gl}-${resultado.gv}`;
+  const esSigno = !esExacto && signoPred && signoReal && signoPred === signoReal;
+  const esError = resultado && predRaw && !esExacto && !esSigno;
+
+  async function handlePred(side: 'local' | 'visita', val: string) {
+    if (!puedeApostar) return;
+    const num = parseInt(val);
+    if (val !== '' && (isNaN(num) || num < 0)) return;
+    const glActual = side === 'local' ? (isNaN(num) ? '' : num) : (predGl ?? '');
+    const gvActual = side === 'visita' ? (isNaN(num) ? '' : num) : (predGv ?? '');
+    if (glActual === '' || gvActual === '') return;
+    await setPredicion(partido.id, `${glActual}-${gvActual}`);
+  }
 
   function handleScore(side: 'local' | 'visita', val: string) {
     const num = parseInt(val);
@@ -45,7 +59,7 @@ const mensajeBloqueo = estado === 'muy_temprano'
       className="card fade-up"
       style={{
         padding: '12px 14px',
-        borderColor: isCorrect ? 'rgba(0,154,85,0.4)' : isWrong ? 'rgba(200,16,46,0.3)' : undefined,
+        borderColor: esExacto ? 'rgba(201,168,76,0.5)' : esSigno ? 'rgba(0,154,85,0.4)' : esError ? 'rgba(200,16,46,0.3)' : undefined,
       }}
     >
       {/* Meta */}
@@ -57,11 +71,11 @@ const mensajeBloqueo = estado === 'muy_temprano'
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {bloqueado && !resReal && (
-  <span style={{ fontSize: 10, color: '#FF6B00', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
-    🔒 {mensajeBloqueo}
-  </span>
-)}
+          {bloqueado && !resultado && (
+            <span style={{ fontSize: 10, color: '#FF6B00', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
+              🔒 Cierra {horaCierre(partido)}hs
+            </span>
+          )}
           <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{partido.sede}</span>
         </div>
       </div>
@@ -72,16 +86,14 @@ const mensajeBloqueo = estado === 'muy_temprano'
         {/* Local */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
           <FlagImg equipo={partido.local} size={28} />
-          <span style={{
-            fontSize: 12, fontWeight: 700, lineHeight: 1.2,
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
+          <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {partido.local}
           </span>
         </div>
 
         {/* Centro */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Resultado real (admin carga) */}
           {showResultInput && jugadorActivo?.esAdmin ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <input className="score-input" type="number" min={0} max={20}
@@ -102,47 +114,57 @@ const mensajeBloqueo = estado === 'muy_temprano'
             <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, padding: '0 4px' }}>VS</span>
           )}
 
-          {/* Botones 1 X 2 */}
+          {/* Inputs predicción */}
           {!showResultInput && (
-            <div style={{ display: 'flex', gap: 4 }}>
-              {(['1', 'X', '2'] as const)
-  .filter(v => partido.fase === 'grupos' || v !== 'X')
-  .map(v => (
-    <button
-      key={v}
-      className={`pred-btn${pred === v ? ` active-${v.toLowerCase()}` : ''}`}
-      onClick={() => puedeApostar && setPredicion(partido.id, v)}
-      disabled={!puedeApostar}
-      style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'pointer' }}
-    >
-      {v}
-    </button>
- ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <input
+                className="score-input"
+                type="number" min={0} max={20}
+                value={predGl ?? ''}
+                placeholder="0"
+                disabled={!puedeApostar}
+                onChange={e => handlePred('local', e.target.value)}
+                style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text' }}
+              />
+              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 14 }}>-</span>
+              <input
+                className="score-input"
+                type="number" min={0} max={20}
+                value={predGv ?? ''}
+                placeholder="0"
+                disabled={!puedeApostar}
+                onChange={e => handlePred('visita', e.target.value)}
+                style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text' }}
+              />
             </div>
+          )}
+
+          {/* Mi predicción guardada */}
+          {!showResultInput && predRaw && (
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
+              Tu apuesta: {predRaw}
+            </span>
           )}
         </div>
 
         {/* Visita */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, flexDirection: 'row-reverse', minWidth: 0 }}>
           <FlagImg equipo={partido.visita} size={28} />
-          <span style={{
-            fontSize: 12, fontWeight: 700, lineHeight: 1.2, textAlign: 'right',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
+          <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.2, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {partido.visita}
           </span>
         </div>
       </div>
 
-      {/* Badge */}
-      {(isCorrect || isWrong) && (
+      {/* Badge resultado */}
+      {(esExacto || esSigno || esError) && (
         <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
           <span className="badge" style={{
-            background: isCorrect ? 'rgba(0,107,60,0.3)' : 'rgba(200,16,46,0.2)',
-            color: isCorrect ? '#00D46A' : '#FF4D6D',
-            border: `1px solid ${isCorrect ? 'rgba(0,212,106,0.3)' : 'rgba(255,77,109,0.3)'}`,
+            background: esExacto ? 'rgba(201,168,76,0.2)' : esSigno ? 'rgba(0,107,60,0.3)' : 'rgba(200,16,46,0.2)',
+            color: esExacto ? 'var(--gold)' : esSigno ? '#00D46A' : '#FF4D6D',
+            border: `1px solid ${esExacto ? 'rgba(201,168,76,0.4)' : esSigno ? 'rgba(0,212,106,0.3)' : 'rgba(255,77,109,0.3)'}`,
           }}>
-            {isCorrect ? '✓ Acertaste' : '✗ Error'}
+            {esExacto ? '★ Exacto +5pts' : esSigno ? '✓ Signo +3pts' : '✗ Error'}
           </span>
         </div>
       )}

@@ -46,24 +46,18 @@ export type EstadoApuesta = 'muy_temprano' | 'abierto' | 'cerrado';
 export function getEstadoApuesta(partido: Partido): EstadoApuesta {
   const ahora = new Date();
   const inicio = new Date(partido.fechaISO);
-  const dos = new Date(inicio.getTime() - 2 * 60 * 60 * 1000);
+  const unaHoraAntes = new Date(inicio.getTime() - 1 * 60 * 60 * 1000);
 
-  // Primer partido del mundial: 11 Jun 19:00 UTC (16:00 ARG)
-  const primerPartido = new Date('2026-06-11T19:00:00Z');
-  const cierreFaseGrupos = new Date(primerPartido.getTime() - 2 * 60 * 60 * 1000);
-
-  // Fin fase de grupos: último partido 27 Jun
-  const finGrupos = new Date('2026-06-28T23:00:00Z');
-
+  // Fase de grupos: abierto ahora hasta 1hs antes de cada partido
   if (partido.fase === 'grupos') {
-    if (ahora < cierreFaseGrupos) return 'abierto';
-    if (ahora >= cierreFaseGrupos && ahora < dos) return 'cerrado';
+    if (ahora < unaHoraAntes) return 'abierto';
     return 'cerrado';
   }
 
-  // Fases eliminatorias: bloqueado hasta que terminen los grupos
+  // Eliminatorias: bloqueado hasta que terminen los grupos
+  const finGrupos = new Date('2026-06-28T23:00:00Z');
   if (ahora < finGrupos) return 'muy_temprano';
-  if (ahora < dos) return 'abierto';
+  if (ahora < unaHoraAntes) return 'abierto';
   return 'cerrado';
 }
 
@@ -74,10 +68,10 @@ export function estaBloquado(partido: Partido): boolean {
 }
 
 // Hora Argentina formateada
-export function horaApertura(partido: Partido): string {
+export function horaCierre(partido: Partido): string {
   const inicio = new Date(partido.fechaISO);
-  const apertura = new Date(inicio.getTime() - 6 * 60 * 60 * 1000);
-  return apertura.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
+  const cierre = new Date(inicio.getTime() - 1 * 60 * 60 * 1000);
+  return cierre.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
 }
 
 export const EQUIPOS: Record<string, Equipo> = {
