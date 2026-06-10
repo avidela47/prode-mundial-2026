@@ -37,7 +37,7 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
 
   const esExacto = resultado && predRaw === `${resultado.gl}-${resultado.gv}`;
   const esSigno = !esExacto && signoPred && signoReal && signoPred === signoReal;
-  const esError = resultado && predRaw && !esExacto && !esSigno;
+  const esError = resultado && predRaw && predRaw.includes('-') && !esExacto && !esSigno;
 
   
 
