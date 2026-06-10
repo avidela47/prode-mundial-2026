@@ -39,10 +39,9 @@ export function PartidoCard({ partido, showResultInput = false }: Props) {
   async function handlePred(side: 'local' | 'visita', val: string) {
     if (!puedeApostar) return;
     const num = parseInt(val);
-    if (val !== '' && (isNaN(num) || num < 0)) return;
-    const glActual = side === 'local' ? (isNaN(num) ? '' : num) : (predGl ?? '');
-    const gvActual = side === 'visita' ? (isNaN(num) ? '' : num) : (predGv ?? '');
-    if (glActual === '' || gvActual === '') return;
+    if (isNaN(num) || num < 0) return;
+    const glActual = side === 'local' ? num : (predGl ?? 0);
+    const gvActual = side === 'visita' ? num : (predGv ?? 0);
     await setPredicion(partido.id, `${glActual}-${gvActual}`);
   }
 
