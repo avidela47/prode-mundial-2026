@@ -111,38 +111,38 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
 
           {/* Inputs predicción */}
           {!showResultInput && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input
-                className="score-input"
-                type="number" min={0} max={20}
-                value={localInput}
-                placeholder="0"
-                disabled={!puedeApostar}
-                onChange={e => setLocalInput(e.target.value)}
-                onBlur={async e => {
-                  const gl = parseInt(e.target.value);
-                  const gv = parseInt(visitaInput);
-                  if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
-                }}
-                style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text' }}
-              />
-              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 14 }}>-</span>
-              <input
-                className="score-input"
-                type="number" min={0} max={20}
-                value={visitaInput}
-                placeholder="0"
-                disabled={!puedeApostar}
-                onChange={e => setVisitaInput(e.target.value)}
-                onBlur={async e => {
-                  const gl = parseInt(localInput);
-                  const gv = parseInt(e.target.value);
-                  if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
-                }}
-                style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text' }}
-              />
-            </div>
-          )}
+  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+    <input
+      className="score-input"
+      type="number" min={0} max={20}
+      value={localInput}
+      placeholder="0"
+      disabled={!puedeApostar}
+      onChange={e => setLocalInput(e.target.value)}
+      onBlur={async () => {
+        const gl = parseInt(localInput);
+        const gv = parseInt(visitaInput);
+        if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
+      }}
+      style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18, WebkitAppearance: 'none' }}
+    />
+    <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 14 }}>-</span>
+    <input
+      className="score-input"
+      type="number" min={0} max={20}
+      value={visitaInput}
+      placeholder="0"
+      disabled={!puedeApostar}
+      onChange={e => setVisitaInput(e.target.value)}
+      onBlur={async () => {
+        const gl = parseInt(localInput);
+        const gv = parseInt(visitaInput);
+        if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
+      }}
+      style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18, WebkitAppearance: 'none' }}
+    />
+  </div>
+)}
 
           {/* Mi predicción guardada */}
           {!showResultInput && predRaw && (

@@ -188,3 +188,13 @@ body {
   .ranking-grid { grid-template-columns: 32px 1fr 44px 44px 44px; }
   .score-input { width: 40px; height: 40px; font-size: 16px; }
 }
+
+input[type=number] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
