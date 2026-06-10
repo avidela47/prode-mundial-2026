@@ -20,7 +20,7 @@ export interface Equipo {
 }
 
 // Puntos por fase
-export const PUNTOS_FASE: Record<Fase, number> = {
+export const PUNTOS_SIGNO: Record<Fase, number> = {
   'grupos':      3,
   '1/16':        5,
   'octavos':     5,
@@ -30,17 +30,40 @@ export const PUNTOS_FASE: Record<Fase, number> = {
   'final':      10,
 };
 
+export const PUNTOS_EXACTO: Record<Fase, number> = {
+  'grupos':      5,
+  '1/16':        8,
+  'octavos':     8,
+  'cuartos':     12,
+  'semis':       12,
+  '3er_puesto': 15,
+  'final':      15,
+};
+
 // Retorna el estado del partido para apuestas
 export type EstadoApuesta = 'muy_temprano' | 'abierto' | 'cerrado';
 
 export function getEstadoApuesta(partido: Partido): EstadoApuesta {
   const ahora = new Date();
   const inicio = new Date(partido.fechaISO);
-  const seis = new Date(inicio.getTime() - 6 * 60 * 60 * 1000);
   const dos = new Date(inicio.getTime() - 2 * 60 * 60 * 1000);
 
-  if (ahora < seis) return 'muy_temprano';
-  if (ahora >= seis && ahora < dos) return 'abierto';
+  // Primer partido del mundial: 11 Jun 19:00 UTC (16:00 ARG)
+  const primerPartido = new Date('2026-06-11T19:00:00Z');
+  const cierreFaseGrupos = new Date(primerPartido.getTime() - 2 * 60 * 60 * 1000);
+
+  // Fin fase de grupos: último partido 27 Jun
+  const finGrupos = new Date('2026-06-28T23:00:00Z');
+
+  if (partido.fase === 'grupos') {
+    if (ahora < cierreFaseGrupos) return 'abierto';
+    if (ahora >= cierreFaseGrupos && ahora < dos) return 'cerrado';
+    return 'cerrado';
+  }
+
+  // Fases eliminatorias: bloqueado hasta que terminen los grupos
+  if (ahora < finGrupos) return 'muy_temprano';
+  if (ahora < dos) return 'abierto';
   return 'cerrado';
 }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { PARTIDOS, PUNTOS_FASE } from '@/lib/fixture';
+import { PARTIDOS, PUNTOS_SIGNO } from '@/lib/fixture';
 
 const DB = 'prode-mundial2026';
 
@@ -35,7 +35,7 @@ export async function GET() {
         if (pred.valor === resReal) {
           const partido = PARTIDOS.find(p => p.id === pred.partidoId);
           const fase = partido?.fase ?? 'grupos';
-          puntos += PUNTOS_FASE[fase];
+          puntos += PUNTOS_SIGNO[fase];
           aciertos++;
         }
       }

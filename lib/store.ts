@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { PARTIDOS, PUNTOS_FASE, estaBloquado, type Fase } from './fixture';
+import { PARTIDOS, PUNTOS_SIGNO, estaBloquado, type Fase } from './fixture';
 
 export interface Jugador {
   id: string;
@@ -30,8 +30,8 @@ export interface ProdeStore {
   setResultado: (partidoId: string, gl: number, gv: number) => Promise<void>;
 
   // Puntos
-  getPuntosJugador: (jugadorId: string) => { puntos: number; aciertos: number; jugados: number };
-  getRanking: () => Array<Jugador & { puntos: number; aciertos: number; jugados: number }>;
+  getPuntosJugador: (jugadorId: string) => { puntos: number; aciertos: number; exactos: number; jugados: number };
+  getRanking: () => Array<Jugador & { puntos: number; aciertos: number; exactos: number; jugados: number }>;
 }
 
 function calcResultado(gl: number, gv: number): '1' | 'X' | '2' {
@@ -148,23 +148,27 @@ export const useProdeStore = create<ProdeStore>((set, get) => ({
   },
 
   getPuntosJugador: (jugadorId) => {
-    const { predicciones, resultados } = get();
-    const preds = predicciones[jugadorId] || {};
-    let puntos = 0, aciertos = 0, jugados = 0;
+  const { predicciones, resultados } = get();
+  const preds = predicciones[jugadorId] || {};
+  const exactos = 0;
+let puntos = 0, aciertos = 0, jugados = 0;
 
-    for (const [partidoId, res] of Object.entries(resultados)) {
-      const pred = preds[partidoId];
-      if (!pred) continue;
-      jugados++;
-      const resReal = calcResultado(res.gl, res.gv);
-      if (pred === resReal) {
-        puntos += PUNTOS_FASE[getFase(partidoId)];
-        aciertos++;
-      }
+  for (const [partidoId, res] of Object.entries(resultados)) {
+    const pred = preds[partidoId];
+    if (!pred) continue;
+    jugados++;
+    const resReal = calcResultado(res.gl, res.gv);
+    const fase = getFase(partidoId);
+
+    if (pred === resReal) {
+      // Acertó el signo — verificar si también acertó exacto
+      // El exacto requiere predicción de goles (por ahora solo signo)
+      puntos += PUNTOS_SIGNO[fase];
+      aciertos++;
     }
-    return { puntos, aciertos, jugados };
-  },
-
+  }
+  return { puntos, aciertos, exactos, jugados };
+},
   getRanking: () => {
     const { jugadores, getPuntosJugador } = get();
     return jugadores
