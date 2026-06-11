@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Jugador {
   id: string;
@@ -10,20 +11,35 @@ interface Jugador {
 }
 
 export default function Setup() {
+  const [checking, setChecking] = useState(true);
   const [nombre, setNombre] = useState('');
   const [dni, setDni] = useState('');
   const [esAdmin, setEsAdmin] = useState(false);
   const [msg, setMsg] = useState('');
   const [jugadores, setJugadores] = useState<Jugador[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const id = sessionStorage.getItem('jugadorActivoId');
+    if (!id) { router.replace('/'); return; }
+    fetch('/api/usuarios')
+      .then(r => r.json())
+      .then((data: Jugador[]) => {
+        const jugador = data.find(j => j.id === id);
+        if (!jugador?.esAdmin) { router.replace('/'); return; }
+        setJugadores(data);
+        setChecking(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (checking) return null;
 
   async function cargarJugadores() {
     const res = await fetch('/api/usuarios');
     const data = await res.json();
     setJugadores(data);
   }
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-useEffect(() => { void cargarJugadores(); }, []);
 
   async function handleAdd() {
     if (!nombre.trim() || dni.length !== 4) {
@@ -59,27 +75,17 @@ useEffect(() => { void cargarJugadores(); }, []);
       <p style={{ color: '#8899BB', marginBottom: 24, fontSize: 13 }}>Esta página solo la usa el admin para cargar los jugadores.</p>
 
       <div style={{ maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <input
-          value={nombre}
-          onChange={e => setNombre(e.target.value)}
-          placeholder="Nombre"
-          style={{ height: 44, padding: '0 14px', borderRadius: 8, border: '1px solid #333', background: '#111827', color: '#fff', fontSize: 15 }}
-        />
-        <input
-          value={dni}
-          onChange={e => setDni(e.target.value.replace(/\D/g, '').slice(0, 4))}
-          placeholder="4 últimos dígitos DNI"
-          maxLength={4}
-          style={{ height: 44, padding: '0 14px', borderRadius: 8, border: '1px solid #333', background: '#111827', color: '#fff', fontSize: 15 }}
-        />
+        <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre"
+          style={{ height: 44, padding: '0 14px', borderRadius: 8, border: '1px solid #333', background: '#111827', color: '#fff', fontSize: 15 }} />
+        <input value={dni} onChange={e => setDni(e.target.value.replace(/\D/g, '').slice(0, 4))}
+          placeholder="4 últimos dígitos DNI" maxLength={4}
+          style={{ height: 44, padding: '0 14px', borderRadius: 8, border: '1px solid #333', background: '#111827', color: '#fff', fontSize: 15 }} />
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
           <input type="checkbox" checked={esAdmin} onChange={e => setEsAdmin(e.target.checked)} />
           Es admin
         </label>
-        <button
-          onClick={handleAdd}
-          style={{ height: 44, background: '#C9A84C', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}
-        >
+        <button onClick={handleAdd}
+          style={{ height: 44, background: '#C9A84C', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
           AGREGAR
         </button>
         {msg && <div style={{ color: msg.startsWith('❌') ? '#FF6B6B' : '#00D46A', fontWeight: 600 }}>{msg}</div>}
