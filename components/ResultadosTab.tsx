@@ -5,7 +5,6 @@ import { PARTIDOS, GRUPOS_LIST, FASES_LABEL, type Fase, type Partido } from '@/l
 import { useProdeStore } from '@/lib/store';
 import { PartidoCard } from './PartidoCard';
 
-
 const FASES_ELIMINACION: Fase[] = ['1/16', 'octavos', 'cuartos', 'semis', '3er_puesto', 'final'];
 
 interface Jugador { id: string; nombre: string; color: string; }
@@ -33,7 +32,6 @@ function PredsPartido({ partido, jugadores, preds }: { partido: Partido; jugador
             </div>
           );
 
-          // Parsear predicción
           let display = pred.valor;
           let signo = pred.valor;
           if (pred.valor.includes('-')) {
@@ -41,7 +39,6 @@ function PredsPartido({ partido, jugadores, preds }: { partido: Partido; jugador
             display = `${gl} - ${gv}`;
             signo = gl > gv ? '1' : gl === gv ? 'X' : '2';
           }
-
           const signoLabel = signo === '1' ? partido.local : signo === 'X' ? 'Empate' : partido.visita;
 
           return (
@@ -75,16 +72,7 @@ export function ResultadosTab() {
     ]).then(([j, p]) => { setJugadores(j); setPreds(p); });
   }, []);
 
-  if (!jugadorActivo?.esAdmin) {
-    return (
-      <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
-        <div style={{ fontSize: 18, fontFamily: 'Bebas Neue', letterSpacing: '0.05em' }}>
-          Solo el admin puede cargar resultados
-        </div>
-      </div>
-    );
-  }
+  const esAdmin = jugadorActivo?.esAdmin === true;
 
   const filtrados = seccion === 'grupos'
     ? PARTIDOS.filter(p => p.grupo === grupoActivo)
@@ -92,10 +80,12 @@ export function ResultadosTab() {
 
   return (
     <div>
-      <div style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: 10, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 18 }}>⚽</span>
-        <span style={{ fontSize: 14, color: 'var(--gold)' }}>Ingresá los resultados reales para calcular los puntos automáticamente.</span>
-      </div>
+      {esAdmin && (
+        <div style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: 10, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18 }}>⚽</span>
+          <span style={{ fontSize: 14, color: 'var(--gold)' }}>Ingresá los resultados reales para calcular los puntos automáticamente.</span>
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {(['grupos', 'eliminacion'] as const).map(s => (
@@ -126,7 +116,7 @@ export function ResultadosTab() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {filtrados.map(p => (
           <div key={p.id}>
-            <PartidoCard partido={p} showResultInput />
+            <PartidoCard partido={p} showResultInput={esAdmin} />
             <PredsPartido partido={p} jugadores={jugadores} preds={preds} />
           </div>
         ))}
