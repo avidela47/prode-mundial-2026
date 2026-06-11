@@ -8,23 +8,22 @@ import { getEstadoApuesta, horaCierre, type Partido } from '@/lib/fixture';
 interface Props {
   partido: Partido;
   showResultInput?: boolean;
+  readOnly?: boolean;
 }
 
-export function PartidoCard({ partido, showResultInput = false }: Props) {
+export function PartidoCard({ partido, showResultInput = false, readOnly = false }: Props) {
   const { jugadorActivo, predicciones, resultados, setPredicion, setResultado } = useProdeStore();
 
   const predRaw = jugadorActivo ? (predicciones[jugadorActivo.id]?.[partido.id] || '') : '';
-  // prediccion guardada como "gl-gv" ej: "2-1"
   const [predGl, predGv] = predRaw.includes('-') ? predRaw.split('-').map(Number) : [null, null];
   const [localInput, setLocalInput] = useState(predGl !== null ? String(predGl) : '');
-const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) : '');
+  const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) : '');
 
   const resultado = resultados[partido.id];
   const estado = getEstadoApuesta(partido);
   const bloqueado = estado !== 'abierto';
-  const puedeApostar = jugadorActivo && !showResultInput && (!bloqueado || jugadorActivo.esAdmin);
+  const puedeApostar = jugadorActivo && !showResultInput && !readOnly && (!bloqueado || jugadorActivo.esAdmin);
 
-  // Calcular signo de la predicción
   function signo(gl: number | null, gv: number | null): '1' | 'X' | '2' | null {
     if (gl === null || gv === null) return null;
     if (gl > gv) return '1';
@@ -34,12 +33,9 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
 
   const signoPred = signo(predGl, predGv);
   const signoReal = resultado ? signo(resultado.gl, resultado.gv) : null;
-
   const esExacto = resultado && predRaw === `${resultado.gl}-${resultado.gv}`;
   const esSigno = !esExacto && signoPred && signoReal && signoPred === signoReal;
   const esError = resultado && predRaw && predRaw.includes('-') && !esExacto && !esSigno;
-
-  
 
   function handleScore(side: 'local' | 'visita', val: string) {
     const num = parseInt(val);
@@ -50,13 +46,10 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
   }
 
   return (
-    <div
-      className="card fade-up"
-      style={{
-        padding: '12px 14px',
-        borderColor: esExacto ? 'rgba(201,168,76,0.5)' : esSigno ? 'rgba(0,154,85,0.4)' : esError ? 'rgba(200,16,46,0.3)' : undefined,
-      }}
-    >
+    <div className="card fade-up" style={{
+      padding: '12px 14px',
+      borderColor: esExacto ? 'rgba(201,168,76,0.5)' : esSigno ? 'rgba(0,154,85,0.4)' : esError ? 'rgba(200,16,46,0.3)' : undefined,
+    }}>
       {/* Meta */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -66,7 +59,7 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {bloqueado && !resultado && (
+          {bloqueado && !resultado && !readOnly && (
             <span style={{ fontSize: 10, color: '#FF6B00', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
               🔒 Cierra {horaCierre(partido)}hs
             </span>
@@ -88,18 +81,17 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
 
         {/* Centro */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          {/* Resultado real (admin carga) */}
+
+          {/* Admin carga resultado */}
           {showResultInput && jugadorActivo?.esAdmin ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <input className="score-input" type="number" min={0} max={20}
-                defaultValue={resultado?.gl ?? ''} placeholder="0"
-                onChange={e => handleScore('local', e.target.value)}
-              />
-              <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>:</span>
-              <input className="score-input" type="number" min={0} max={20}
-                defaultValue={resultado?.gv ?? ''} placeholder="0"
-                onChange={e => handleScore('visita', e.target.value)}
-              />
+  value={resultado?.gl ?? ''} placeholder="0"
+  onChange={e => handleScore('local', e.target.value)} />
+<span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>:</span>
+<input className="score-input" type="number" min={0} max={20}
+  value={resultado?.gv ?? ''} placeholder="0"
+  onChange={e => handleScore('visita', e.target.value)} />
             </div>
           ) : resultado ? (
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gold)', fontFamily: 'Bebas Neue', letterSpacing: 2, padding: '0 4px' }}>
@@ -109,44 +101,43 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
             <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, padding: '0 4px' }}>VS</span>
           )}
 
-          {/* Inputs predicción */}
-          {!showResultInput && (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-    <input
-      className="score-input"
-      type="number" min={0} max={20}
-      value={localInput}
-      placeholder="0"
-      disabled={!puedeApostar}
-      onChange={e => setLocalInput(e.target.value)}
-      onBlur={async () => {
-        const gl = parseInt(localInput);
-        const gv = parseInt(visitaInput);
-        if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
-      }}
-      style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18, WebkitAppearance: 'none' }}
-    />
-    <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 14 }}>-</span>
-    <input
-      className="score-input"
-      type="number" min={0} max={20}
-      value={visitaInput}
-      placeholder="0"
-      disabled={!puedeApostar}
-      onChange={e => setVisitaInput(e.target.value)}
-      onBlur={async () => {
-        const gl = parseInt(localInput);
-        const gv = parseInt(visitaInput);
-        if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
-      }}
-      style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18, WebkitAppearance: 'none' }}
-    />
-  </div>
-)}
+          {/* Inputs predicción — solo en fixture, no en resultados */}
+          {!showResultInput && !readOnly && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <input className="score-input" type="number" min={0} max={20}
+                value={localInput} placeholder="0" disabled={!puedeApostar}
+                onChange={e => setLocalInput(e.target.value)}
+                onBlur={async () => {
+                  const gl = parseInt(localInput);
+                  const gv = parseInt(visitaInput);
+                  if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
+                }}
+                style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18 }}
+              />
+              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 14 }}>-</span>
+              <input className="score-input" type="number" min={0} max={20}
+                value={visitaInput} placeholder="0" disabled={!puedeApostar}
+                onChange={e => setVisitaInput(e.target.value)}
+                onBlur={async () => {
+                  const gl = parseInt(localInput);
+                  const gv = parseInt(visitaInput);
+                  if (!isNaN(gl) && !isNaN(gv) && gl >= 0 && gv >= 0) await setPredicion(partido.id, `${gl}-${gv}`);
+                }}
+                style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18 }}
+              />
+            </div>
+          )}
 
-          {/* Mi predicción guardada */}
-          {!showResultInput && predRaw && (
+          {/* Apuesta guardada */}
+          {!showResultInput && !readOnly && predRaw && (
             <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
+              Tu apuesta: {predRaw}
+            </span>
+          )}
+
+          {/* En modo readOnly mostrar apuesta sin inputs */}
+          {readOnly && predRaw && (
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
               Tu apuesta: {predRaw}
             </span>
           )}
@@ -161,7 +152,7 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
         </div>
       </div>
 
-      {/* Badge resultado */}
+      {/* Badge */}
       {(esExacto || esSigno || esError) && (
         <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
           <span className="badge" style={{
