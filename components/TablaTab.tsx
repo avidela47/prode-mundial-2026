@@ -1,15 +1,37 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useProdeStore } from '@/lib/store';
 import { PARTIDOS } from '@/lib/fixture';
 
-export function TablaTab() {
-  const { jugadores, jugadorActivo, getRanking, init } = useProdeStore();
-  const ranking = getRanking();
-  const jugados = Object.keys(useProdeStore.getState().resultados).length;
+interface RankingRow {
+  id: string;
+  nombre: string;
+  color: string;
+  esAdmin: boolean;
+  puntos: number;
+  aciertos: number;
+  jugados: number;
+}
 
-  useEffect(() => { void init(); }, []);
+export function TablaTab() {
+  const { jugadorActivo } = useProdeStore();
+  const [ranking, setRanking] = useState<RankingRow[]>([]);
+  const [jugados, setJugados] = useState(0);
+
+  async function cargarRanking() {
+    const [rankRes, resRes] = await Promise.all([
+      fetch('/api/ranking'),
+      fetch('/api/resultados'),
+    ]);
+    const rankData = await rankRes.json();
+    const resData = await resRes.json();
+    setRanking(rankData);
+    setJugados(resData.length);
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void cargarRanking(); }, []);
 
   return (
     <div>
@@ -17,7 +39,7 @@ export function TablaTab() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 28 }}>
         {[
           { label: 'Partidos jugados', value: jugados, of: PARTIDOS.length },
-          { label: 'Participantes', value: jugadores.length },
+          { label: 'Participantes', value: ranking.length },
           { label: 'Puntos en juego', value: (PARTIDOS.length - jugados) * 3 },
         ].map((s, i) => (
           <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 12px' }}>
