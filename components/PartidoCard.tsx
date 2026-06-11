@@ -8,9 +8,10 @@ import { getEstadoApuesta, horaCierre, type Partido } from '@/lib/fixture';
 interface Props {
   partido: Partido;
   showResultInput?: boolean;
+  readOnly?: boolean;
 }
 
-export function PartidoCard({ partido, showResultInput = false }: Props) {
+export function PartidoCard({ partido, showResultInput = false, readOnly = false }: Props) {
   const { jugadorActivo, predicciones, resultados, setPredicion, setResultado } = useProdeStore();
 
   const predRaw = jugadorActivo ? (predicciones[jugadorActivo.id]?.[partido.id] || '') : '';
@@ -22,7 +23,7 @@ const [visitaInput, setVisitaInput] = useState(predGv !== null ? String(predGv) 
   const resultado = resultados[partido.id];
   const estado = getEstadoApuesta(partido);
   const bloqueado = estado !== 'abierto';
-  const puedeApostar = jugadorActivo && !showResultInput && (!bloqueado || jugadorActivo.esAdmin);
+  const puedeApostar = jugadorActivo && !showResultInput && !readOnly && (!bloqueado || jugadorActivo.esAdmin);
 
   // Calcular signo de la predicción
   function signo(gl: number | null, gv: number | null): '1' | 'X' | '2' | null {

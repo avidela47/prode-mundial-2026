@@ -116,7 +116,7 @@ export function ResultadosTab() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {filtrados.map(p => (
           <div key={p.id}>
-            <PartidoCard partido={p} showResultInput={esAdmin} />
+            <PartidoCard partido={p} showResultInput={esAdmin} readOnly={!esAdmin} />
             <PredsPartido partido={p} jugadores={jugadores} preds={preds} />
           </div>
         ))}
