@@ -4,6 +4,16 @@ import clientPromise from '@/lib/mongodb';
 const DB = 'prode-mundial2026';
 const COL = 'resultados';
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const { partidoId } = await req.json();
+    const client = await clientPromise;
+    await client.db(DB).collection('resultados').deleteOne({ partidoId });
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: 'Error al borrar resultado' }, { status: 500 });
+  }
+}
 // GET — todos los resultados
 export async function GET() {
   try {

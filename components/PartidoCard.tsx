@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function PartidoCard({ partido, showResultInput = false, readOnly = false }: Props) {
-  const { jugadorActivo, predicciones, resultados, setPredicion, setResultado } = useProdeStore();
+  const { jugadorActivo, predicciones, resultados, setPredicion, setResultado, deleteResultado } = useProdeStore();
 
   const predRaw = jugadorActivo ? (predicciones[jugadorActivo.id]?.[partido.id] || '') : '';
   const [predGl, predGv] = predRaw.includes('-') ? predRaw.split('-').map(Number) : [null, null];
@@ -82,16 +82,24 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
         {/* Centro */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
 
-          {/* Admin carga resultado */}
+          {/* Admin: inputs para cargar resultado */}
           {showResultInput && jugadorActivo?.esAdmin ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input className="score-input" type="number" min={0} max={20}
-  value={resultado?.gl ?? ''} placeholder="0"
-  onChange={e => handleScore('local', e.target.value)} />
-<span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>:</span>
-<input className="score-input" type="number" min={0} max={20}
-  value={resultado?.gv ?? ''} placeholder="0"
-  onChange={e => handleScore('visita', e.target.value)} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input className="score-input" type="number" min={0} max={20}
+                  value={resultado?.gl ?? ''} placeholder="0"
+                  onChange={e => handleScore('local', e.target.value)} />
+                <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>:</span>
+                <input className="score-input" type="number" min={0} max={20}
+                  value={resultado?.gv ?? ''} placeholder="0"
+                  onChange={e => handleScore('visita', e.target.value)} />
+              </div>
+              {resultado && (
+                <button onClick={() => deleteResultado(partido.id)}
+                  style={{ fontSize: 10, color: '#FF4D6D', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
+                  ✕ Borrar resultado
+                </button>
+              )}
             </div>
           ) : resultado ? (
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gold)', fontFamily: 'Bebas Neue', letterSpacing: 2, padding: '0 4px' }}>
@@ -101,7 +109,7 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
             <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, padding: '0 4px' }}>VS</span>
           )}
 
-          {/* Inputs predicción — solo en fixture, no en resultados */}
+          {/* Inputs predicción — solo fixture, no readOnly */}
           {!showResultInput && !readOnly && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <input className="score-input" type="number" min={0} max={20}
@@ -129,15 +137,8 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
           )}
 
           {/* Apuesta guardada */}
-          {!showResultInput && !readOnly && predRaw && (
+          {!showResultInput && predRaw && (
             <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
-              Tu apuesta: {predRaw}
-            </span>
-          )}
-
-          {/* En modo readOnly mostrar apuesta sin inputs */}
-          {readOnly && predRaw && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
               Tu apuesta: {predRaw}
             </span>
           )}
