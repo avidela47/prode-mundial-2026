@@ -5,9 +5,9 @@ export interface Partido {
   id: string;
   fase: Fase;
   grupo?: string;
-  fechaISO: string; // UTC — para calcular bloqueo
-  fecha: string;    // display
-  hora: string;     // display hora Argentina
+  fechaISO: string;
+  fecha: string;
+  hora: string;
   sede: string;
   local: string;
   visita: string;
@@ -19,7 +19,6 @@ export interface Equipo {
   grupo?: string;
 }
 
-// Puntos por fase
 export const PUNTOS_SIGNO: Record<Fase, number> = {
   'grupos':      3,
   '1/16':        5,
@@ -40,34 +39,27 @@ export const PUNTOS_EXACTO: Record<Fase, number> = {
   'final':      15,
 };
 
-// Retorna el estado del partido para apuestas
 export type EstadoApuesta = 'muy_temprano' | 'abierto' | 'cerrado';
 
 export function getEstadoApuesta(partido: Partido): EstadoApuesta {
   const ahora = new Date();
   const inicio = new Date(partido.fechaISO);
   const unaHoraAntes = new Date(inicio.getTime() - 1 * 60 * 60 * 1000);
+  const finGrupos = new Date('2026-06-28T23:00:00Z');
 
-  // Fase de grupos: abierto ahora hasta 1hs antes de cada partido
   if (partido.fase === 'grupos') {
     if (ahora < unaHoraAntes) return 'abierto';
     return 'cerrado';
   }
-
-  // Eliminatorias: bloqueado hasta que terminen los grupos
-  const finGrupos = new Date('2026-06-28T23:00:00Z');
   if (ahora < finGrupos) return 'muy_temprano';
   if (ahora < unaHoraAntes) return 'abierto';
   return 'cerrado';
 }
 
-// Para compatibilidad con el código existente
 export function estaBloquado(partido: Partido): boolean {
-  const estado = getEstadoApuesta(partido);
-  return estado !== 'abierto';
+  return getEstadoApuesta(partido) !== 'abierto';
 }
 
-// Hora Argentina formateada
 export function horaCierre(partido: Partido): string {
   const inicio = new Date(partido.fechaISO);
   const cierre = new Date(inicio.getTime() - 1 * 60 * 60 * 1000);
@@ -87,132 +79,130 @@ export const EQUIPOS: Record<string, Equipo> = {
   'Marruecos':       { nombre: 'Marruecos',        codigo: 'ma', grupo: 'C' },
   'Haití':           { nombre: 'Haití',            codigo: 'ht', grupo: 'C' },
   'Escocia':         { nombre: 'Escocia',          codigo: 'gb-sct', grupo: 'C' },
-  'Alemania':        { nombre: 'Alemania',         codigo: 'de', grupo: 'D' },
-  'Curazao':         { nombre: 'Curazao',          codigo: 'cw', grupo: 'D' },
-  'Países Bajos':    { nombre: 'Países Bajos',     codigo: 'nl', grupo: 'D' },
-  'Japón':           { nombre: 'Japón',            codigo: 'jp', grupo: 'D' },
+  'Estados Unidos':  { nombre: 'Estados Unidos',   codigo: 'us', grupo: 'D' },
+  'Paraguay':        { nombre: 'Paraguay',         codigo: 'py', grupo: 'D' },
+  'Australia':       { nombre: 'Australia',        codigo: 'au', grupo: 'D' },
+  'Turquía':         { nombre: 'Turquía',          codigo: 'tr', grupo: 'D' },
+  'Alemania':        { nombre: 'Alemania',         codigo: 'de', grupo: 'E' },
+  'Curazao':         { nombre: 'Curazao',          codigo: 'cw', grupo: 'E' },
   'Costa de Marfil': { nombre: 'Costa de Marfil',  codigo: 'ci', grupo: 'E' },
   'Ecuador':         { nombre: 'Ecuador',          codigo: 'ec', grupo: 'E' },
-  'Suecia':          { nombre: 'Suecia',           codigo: 'se', grupo: 'E' },
-  'Túnez':           { nombre: 'Túnez',            codigo: 'tn', grupo: 'E' },
-  'España':          { nombre: 'España',           codigo: 'es', grupo: 'F' },
-  'Cabo Verde':      { nombre: 'Cabo Verde',       codigo: 'cv', grupo: 'F' },
-  'Bélgica':         { nombre: 'Bélgica',          codigo: 'be', grupo: 'F' },
-  'Egipto':          { nombre: 'Egipto',           codigo: 'eg', grupo: 'F' },
-  'Arabia Saudita':  { nombre: 'Arabia Saudita',   codigo: 'sa', grupo: 'G' },
-  'Uruguay':         { nombre: 'Uruguay',          codigo: 'uy', grupo: 'G' },
+  'Países Bajos':    { nombre: 'Países Bajos',     codigo: 'nl', grupo: 'F' },
+  'Japón':           { nombre: 'Japón',            codigo: 'jp', grupo: 'F' },
+  'Suecia':          { nombre: 'Suecia',           codigo: 'se', grupo: 'F' },
+  'Túnez':           { nombre: 'Túnez',            codigo: 'tn', grupo: 'F' },
+  'Bélgica':         { nombre: 'Bélgica',          codigo: 'be', grupo: 'G' },
+  'Egipto':          { nombre: 'Egipto',           codigo: 'eg', grupo: 'G' },
   'Irán':            { nombre: 'Irán',             codigo: 'ir', grupo: 'G' },
   'Nueva Zelanda':   { nombre: 'Nueva Zelanda',    codigo: 'nz', grupo: 'G' },
-  'Francia':         { nombre: 'Francia',          codigo: 'fr', grupo: 'H' },
-  'Senegal':         { nombre: 'Senegal',          codigo: 'sn', grupo: 'H' },
-  'Irak':            { nombre: 'Irak',             codigo: 'iq', grupo: 'H' },
-  'Noruega':         { nombre: 'Noruega',          codigo: 'no', grupo: 'H' },
-  'Australia':       { nombre: 'Australia',        codigo: 'au', grupo: 'I' },
-  'Turquía':         { nombre: 'Turquía',          codigo: 'tr', grupo: 'I' },
-  'Estados Unidos':  { nombre: 'Estados Unidos',   codigo: 'us', grupo: 'I' },
-  'Paraguay':        { nombre: 'Paraguay',         codigo: 'py', grupo: 'I' },
+  'España':          { nombre: 'España',           codigo: 'es', grupo: 'H' },
+  'Cabo Verde':      { nombre: 'Cabo Verde',       codigo: 'cv', grupo: 'H' },
+  'Arabia Saudita':  { nombre: 'Arabia Saudita',   codigo: 'sa', grupo: 'H' },
+  'Uruguay':         { nombre: 'Uruguay',          codigo: 'uy', grupo: 'H' },
+  'Francia':         { nombre: 'Francia',          codigo: 'fr', grupo: 'I' },
+  'Senegal':         { nombre: 'Senegal',          codigo: 'sn', grupo: 'I' },
+  'Irak':            { nombre: 'Irak',             codigo: 'iq', grupo: 'I' },
+  'Noruega':         { nombre: 'Noruega',          codigo: 'no', grupo: 'I' },
   'Argentina':       { nombre: 'Argentina',        codigo: 'ar', grupo: 'J' },
   'Argelia':         { nombre: 'Argelia',          codigo: 'dz', grupo: 'J' },
   'Austria':         { nombre: 'Austria',          codigo: 'at', grupo: 'J' },
   'Jordania':        { nombre: 'Jordania',         codigo: 'jo', grupo: 'J' },
   'Portugal':        { nombre: 'Portugal',         codigo: 'pt', grupo: 'K' },
-  'Colombia':        { nombre: 'Colombia',         codigo: 'co', grupo: 'K' },
-  'Uzbekistán':      { nombre: 'Uzbekistán',       codigo: 'uz', grupo: 'K' },
   'RD del Congo':    { nombre: 'RD del Congo',     codigo: 'cd', grupo: 'K' },
+  'Uzbekistán':      { nombre: 'Uzbekistán',       codigo: 'uz', grupo: 'K' },
+  'Colombia':        { nombre: 'Colombia',         codigo: 'co', grupo: 'K' },
   'Inglaterra':      { nombre: 'Inglaterra',       codigo: 'gb-eng', grupo: 'L' },
   'Croacia':         { nombre: 'Croacia',          codigo: 'hr', grupo: 'L' },
   'Ghana':           { nombre: 'Ghana',            codigo: 'gh', grupo: 'L' },
   'Panamá':          { nombre: 'Panamá',           codigo: 'pa', grupo: 'L' },
 };
 
-// fechaISO en UTC — hora Argentina es UTC-3
-// Ejemplo: partido a las 16:00 Argentina = 19:00 UTC
 export const PARTIDOS: Partido[] = [
   // ── GRUPO A ──
   { id:'A1', fase:'grupos', grupo:'A', fechaISO:'2026-06-11T19:00:00Z', fecha:'11 Jun', hora:'16:00', sede:'Ciudad de México', local:'México', visita:'Sudáfrica' },
   { id:'A2', fase:'grupos', grupo:'A', fechaISO:'2026-06-12T02:00:00Z', fecha:'11 Jun', hora:'23:00', sede:'Guadalajara', local:'Corea del Sur', visita:'Rep. Checa' },
-  { id:'A3', fase:'grupos', grupo:'A', fechaISO:'2026-06-18T16:00:00Z', fecha:'18 Jun', hora:'13:00', sede:'Guadalajara', local:'Rep. Checa', visita:'Sudáfrica' },
-  { id:'A4', fase:'grupos', grupo:'A', fechaISO:'2026-06-19T01:00:00Z', fecha:'18 Jun', hora:'22:00', sede:'Ciudad de México', local:'México', visita:'Corea del Sur' },
+  { id:'A3', fase:'grupos', grupo:'A', fechaISO:'2026-06-18T16:00:00Z', fecha:'18 Jun', hora:'13:00', sede:'Atlanta', local:'Rep. Checa', visita:'Sudáfrica' },
+  { id:'A4', fase:'grupos', grupo:'A', fechaISO:'2026-06-19T01:00:00Z', fecha:'18 Jun', hora:'22:00', sede:'Guadalajara', local:'México', visita:'Corea del Sur' },
   { id:'A5', fase:'grupos', grupo:'A', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Guadalajara', local:'México', visita:'Rep. Checa' },
   { id:'A6', fase:'grupos', grupo:'A', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Ciudad de México', local:'Sudáfrica', visita:'Corea del Sur' },
   // ── GRUPO B ──
   { id:'B1', fase:'grupos', grupo:'B', fechaISO:'2026-06-12T19:00:00Z', fecha:'12 Jun', hora:'16:00', sede:'Toronto', local:'Canadá', visita:'Bosnia' },
-  { id:'B2', fase:'grupos', grupo:'B', fechaISO:'2026-06-13T01:00:00Z', fecha:'12 Jun', hora:'22:00', sede:'San Francisco', local:'Qatar', visita:'Suiza' },
-  { id:'B3', fase:'grupos', grupo:'B', fechaISO:'2026-06-18T19:00:00Z', fecha:'18 Jun', hora:'16:00', sede:'San Francisco', local:'Suiza', visita:'Bosnia' },
-  { id:'B4', fase:'grupos', grupo:'B', fechaISO:'2026-06-18T22:00:00Z', fecha:'18 Jun', hora:'19:00', sede:'Toronto', local:'Canadá', visita:'Qatar' },
-  { id:'B5', fase:'grupos', grupo:'B', fechaISO:'2026-06-24T19:00:00Z', fecha:'24 Jun', hora:'16:00', sede:'San Francisco', local:'Suiza', visita:'Canadá' },
+  { id:'B2', fase:'grupos', grupo:'B', fechaISO:'2026-06-13T19:00:00Z', fecha:'13 Jun', hora:'16:00', sede:'San Francisco', local:'Qatar', visita:'Suiza' },
+  { id:'B3', fase:'grupos', grupo:'B', fechaISO:'2026-06-18T19:00:00Z', fecha:'18 Jun', hora:'16:00', sede:'Los Ángeles', local:'Suiza', visita:'Bosnia' },
+  { id:'B4', fase:'grupos', grupo:'B', fechaISO:'2026-06-18T22:00:00Z', fecha:'18 Jun', hora:'19:00', sede:'Vancouver', local:'Canadá', visita:'Qatar' },
+  { id:'B5', fase:'grupos', grupo:'B', fechaISO:'2026-06-24T19:00:00Z', fecha:'24 Jun', hora:'16:00', sede:'Vancouver', local:'Suiza', visita:'Canadá' },
   { id:'B6', fase:'grupos', grupo:'B', fechaISO:'2026-06-24T19:00:00Z', fecha:'24 Jun', hora:'16:00', sede:'Kansas City', local:'Bosnia', visita:'Qatar' },
   // ── GRUPO C ──
   { id:'C1', fase:'grupos', grupo:'C', fechaISO:'2026-06-13T22:00:00Z', fecha:'13 Jun', hora:'19:00', sede:'Nueva Jersey', local:'Brasil', visita:'Marruecos' },
-  { id:'C2', fase:'grupos', grupo:'C', fechaISO:'2026-06-14T01:00:00Z', fecha:'13 Jun', hora:'22:00', sede:'Atlanta', local:'Haití', visita:'Escocia' },
-  { id:'C3', fase:'grupos', grupo:'C', fechaISO:'2026-06-19T22:00:00Z', fecha:'19 Jun', hora:'19:00', sede:'Atlanta', local:'Escocia', visita:'Marruecos' },
-  { id:'C4', fase:'grupos', grupo:'C', fechaISO:'2026-06-20T01:00:00Z', fecha:'19 Jun', hora:'22:00', sede:'Nueva Jersey', local:'Brasil', visita:'Haití' },
+  { id:'C2', fase:'grupos', grupo:'C', fechaISO:'2026-06-14T01:00:00Z', fecha:'13 Jun', hora:'22:00', sede:'Boston', local:'Haití', visita:'Escocia' },
+  { id:'C3', fase:'grupos', grupo:'C', fechaISO:'2026-06-19T22:00:00Z', fecha:'19 Jun', hora:'19:00', sede:'Boston', local:'Escocia', visita:'Marruecos' },
+  { id:'C4', fase:'grupos', grupo:'C', fechaISO:'2026-06-20T00:30:00Z', fecha:'19 Jun', hora:'21:30', sede:'Philadelphia', local:'Brasil', visita:'Haití' },
   { id:'C5', fase:'grupos', grupo:'C', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Nueva Jersey', local:'Brasil', visita:'Escocia' },
   { id:'C6', fase:'grupos', grupo:'C', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Atlanta', local:'Marruecos', visita:'Haití' },
   // ── GRUPO D ──
-  { id:'D1', fase:'grupos', grupo:'D', fechaISO:'2026-06-14T17:00:00Z', fecha:'14 Jun', hora:'14:00', sede:'Los Ángeles', local:'Alemania', visita:'Curazao' },
-  { id:'D2', fase:'grupos', grupo:'D', fechaISO:'2026-06-14T20:00:00Z', fecha:'14 Jun', hora:'17:00', sede:'Dallas', local:'Países Bajos', visita:'Japón' },
-  { id:'D3', fase:'grupos', grupo:'D', fechaISO:'2026-06-20T20:00:00Z', fecha:'20 Jun', hora:'17:00', sede:'Los Ángeles', local:'Alemania', visita:'Costa de Marfil' },
-  { id:'D4', fase:'grupos', grupo:'D', fechaISO:'2026-06-20T17:00:00Z', fecha:'20 Jun', hora:'14:00', sede:'Dallas', local:'Países Bajos', visita:'Suecia' },
-  { id:'D5', fase:'grupos', grupo:'D', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Dallas', local:'Alemania', visita:'Países Bajos' },
-  { id:'D6', fase:'grupos', grupo:'D', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Los Ángeles', local:'Curazao', visita:'Japón' },
+  { id:'D1', fase:'grupos', grupo:'D', fechaISO:'2026-06-13T04:00:00Z', fecha:'13 Jun', hora:'01:00', sede:'Vancouver', local:'Australia', visita:'Turquía' },
+  { id:'D2', fase:'grupos', grupo:'D', fechaISO:'2026-06-13T01:00:00Z', fecha:'12 Jun', hora:'22:00', sede:'Los Ángeles', local:'Estados Unidos', visita:'Paraguay' },
+  { id:'D3', fase:'grupos', grupo:'D', fechaISO:'2026-06-19T19:00:00Z', fecha:'19 Jun', hora:'16:00', sede:'Seattle', local:'Estados Unidos', visita:'Australia' },
+  { id:'D4', fase:'grupos', grupo:'D', fechaISO:'2026-06-20T03:00:00Z', fecha:'19 Jun', hora:'00:00', sede:'San Francisco', local:'Turquía', visita:'Paraguay' },
+  { id:'D5', fase:'grupos', grupo:'D', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Seattle', local:'Estados Unidos', visita:'Turquía' },
+  { id:'D6', fase:'grupos', grupo:'D', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Dallas', local:'Australia', visita:'Paraguay' },
   // ── GRUPO E ──
-  { id:'E1', fase:'grupos', grupo:'E', fechaISO:'2026-06-14T23:00:00Z', fecha:'14 Jun', hora:'20:00', sede:'Boston', local:'Costa de Marfil', visita:'Ecuador' },
-  { id:'E2', fase:'grupos', grupo:'E', fechaISO:'2026-06-15T02:00:00Z', fecha:'14 Jun', hora:'23:00', sede:'Miami', local:'Suecia', visita:'Túnez' },
-  { id:'E3', fase:'grupos', grupo:'E', fechaISO:'2026-06-21T00:00:00Z', fecha:'20 Jun', hora:'21:00', sede:'Miami', local:'Ecuador', visita:'Curazao' },
-  { id:'E4', fase:'grupos', grupo:'E', fechaISO:'2026-06-20T04:00:00Z', fecha:'20 Jun', hora:'01:00', sede:'Boston', local:'Túnez', visita:'Japón' },
-  { id:'E5', fase:'grupos', grupo:'E', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Miami', local:'Costa de Marfil', visita:'Suecia' },
-  { id:'E6', fase:'grupos', grupo:'E', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Boston', local:'Ecuador', visita:'Túnez' },
+  { id:'E1', fase:'grupos', grupo:'E', fechaISO:'2026-06-14T17:00:00Z', fecha:'14 Jun', hora:'14:00', sede:'Houston', local:'Alemania', visita:'Curazao' },
+  { id:'E2', fase:'grupos', grupo:'E', fechaISO:'2026-06-14T23:00:00Z', fecha:'14 Jun', hora:'20:00', sede:'Philadelphia', local:'Costa de Marfil', visita:'Ecuador' },
+  { id:'E3', fase:'grupos', grupo:'E', fechaISO:'2026-06-20T20:00:00Z', fecha:'20 Jun', hora:'17:00', sede:'Toronto', local:'Alemania', visita:'Costa de Marfil' },
+  { id:'E4', fase:'grupos', grupo:'E', fechaISO:'2026-06-21T02:00:00Z', fecha:'20 Jun', hora:'23:00', sede:'Kansas City', local:'Ecuador', visita:'Curazao' },
+  { id:'E5', fase:'grupos', grupo:'E', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Philadelphia', local:'Alemania', visita:'Ecuador' },
+  { id:'E6', fase:'grupos', grupo:'E', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Toronto', local:'Costa de Marfil', visita:'Curazao' },
   // ── GRUPO F ──
-  { id:'F1', fase:'grupos', grupo:'F', fechaISO:'2026-06-15T16:00:00Z', fecha:'15 Jun', hora:'13:00', sede:'Miami', local:'España', visita:'Cabo Verde' },
-  { id:'F2', fase:'grupos', grupo:'F', fechaISO:'2026-06-15T19:00:00Z', fecha:'15 Jun', hora:'16:00', sede:'Kansas City', local:'Bélgica', visita:'Egipto' },
-  { id:'F3', fase:'grupos', grupo:'F', fechaISO:'2026-06-21T16:00:00Z', fecha:'21 Jun', hora:'13:00', sede:'Kansas City', local:'España', visita:'Arabia Saudita' },
-  { id:'F4', fase:'grupos', grupo:'F', fechaISO:'2026-06-21T19:00:00Z', fecha:'21 Jun', hora:'16:00', sede:'Miami', local:'Bélgica', visita:'Irán' },
-  { id:'F5', fase:'grupos', grupo:'F', fechaISO:'2026-06-27T21:00:00Z', fecha:'27 Jun', hora:'18:00', sede:'Kansas City', local:'España', visita:'Bélgica' },
-  { id:'F6', fase:'grupos', grupo:'F', fechaISO:'2026-06-27T21:00:00Z', fecha:'27 Jun', hora:'18:00', sede:'Miami', local:'Cabo Verde', visita:'Egipto' },
+  { id:'F1', fase:'grupos', grupo:'F', fechaISO:'2026-06-14T20:00:00Z', fecha:'14 Jun', hora:'17:00', sede:'Dallas', local:'Países Bajos', visita:'Japón' },
+  { id:'F2', fase:'grupos', grupo:'F', fechaISO:'2026-06-15T02:00:00Z', fecha:'14 Jun', hora:'23:00', sede:'Monterrey', local:'Suecia', visita:'Túnez' },
+  { id:'F3', fase:'grupos', grupo:'F', fechaISO:'2026-06-20T17:00:00Z', fecha:'20 Jun', hora:'14:00', sede:'Houston', local:'Países Bajos', visita:'Suecia' },
+  { id:'F4', fase:'grupos', grupo:'F', fechaISO:'2026-06-21T04:00:00Z', fecha:'20 Jun', hora:'01:00', sede:'Monterrey', local:'Túnez', visita:'Japón' },
+  { id:'F5', fase:'grupos', grupo:'F', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Dallas', local:'Países Bajos', visita:'Túnez' },
+  { id:'F6', fase:'grupos', grupo:'F', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Houston', local:'Japón', visita:'Suecia' },
   // ── GRUPO G ──
-  { id:'G1', fase:'grupos', grupo:'G', fechaISO:'2026-06-15T22:00:00Z', fecha:'15 Jun', hora:'19:00', sede:'Seattle', local:'Arabia Saudita', visita:'Uruguay' },
-  { id:'G2', fase:'grupos', grupo:'G', fechaISO:'2026-06-16T01:00:00Z', fecha:'15 Jun', hora:'22:00', sede:'Houston', local:'Irán', visita:'Nueva Zelanda' },
-  { id:'G3', fase:'grupos', grupo:'G', fechaISO:'2026-06-21T16:00:00Z', fecha:'21 Jun', hora:'13:00', sede:'Seattle', local:'Arabia Saudita', visita:'España' },
-  { id:'G4', fase:'grupos', grupo:'G', fechaISO:'2026-06-21T22:00:00Z', fecha:'21 Jun', hora:'19:00', sede:'Houston', local:'Uruguay', visita:'Cabo Verde' },
-  { id:'G5', fase:'grupos', grupo:'G', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Seattle', local:'Arabia Saudita', visita:'Irán' },
-  { id:'G6', fase:'grupos', grupo:'G', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Houston', local:'Uruguay', visita:'Nueva Zelanda' },
+  { id:'G1', fase:'grupos', grupo:'G', fechaISO:'2026-06-15T19:00:00Z', fecha:'15 Jun', hora:'16:00', sede:'Seattle', local:'Bélgica', visita:'Egipto' },
+  { id:'G2', fase:'grupos', grupo:'G', fechaISO:'2026-06-16T01:00:00Z', fecha:'15 Jun', hora:'22:00', sede:'Los Ángeles', local:'Irán', visita:'Nueva Zelanda' },
+  { id:'G3', fase:'grupos', grupo:'G', fechaISO:'2026-06-21T19:00:00Z', fecha:'21 Jun', hora:'16:00', sede:'Los Ángeles', local:'Bélgica', visita:'Irán' },
+  { id:'G4', fase:'grupos', grupo:'G', fechaISO:'2026-06-22T01:00:00Z', fecha:'21 Jun', hora:'22:00', sede:'Vancouver', local:'Nueva Zelanda', visita:'Egipto' },
+  { id:'G5', fase:'grupos', grupo:'G', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Seattle', local:'Bélgica', visita:'Nueva Zelanda' },
+  { id:'G6', fase:'grupos', grupo:'G', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Los Ángeles', local:'Egipto', visita:'Irán' },
   // ── GRUPO H ──
-  { id:'H1', fase:'grupos', grupo:'H', fechaISO:'2026-06-16T19:00:00Z', fecha:'16 Jun', hora:'16:00', sede:'Nueva York', local:'Francia', visita:'Senegal' },
-  { id:'H2', fase:'grupos', grupo:'H', fechaISO:'2026-06-16T22:00:00Z', fecha:'16 Jun', hora:'19:00', sede:'San Francisco', local:'Irak', visita:'Noruega' },
-  { id:'H3', fase:'grupos', grupo:'H', fechaISO:'2026-06-22T21:00:00Z', fecha:'22 Jun', hora:'18:00', sede:'San Francisco', local:'Francia', visita:'Irak' },
-  { id:'H4', fase:'grupos', grupo:'H', fechaISO:'2026-06-23T00:00:00Z', fecha:'22 Jun', hora:'21:00', sede:'Nueva York', local:'Noruega', visita:'Senegal' },
-  { id:'H5', fase:'grupos', grupo:'H', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Nueva York', local:'Francia', visita:'Noruega' },
-  { id:'H6', fase:'grupos', grupo:'H', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'San Francisco', local:'Senegal', visita:'Irak' },
+  { id:'H1', fase:'grupos', grupo:'H', fechaISO:'2026-06-15T16:00:00Z', fecha:'15 Jun', hora:'13:00', sede:'Atlanta', local:'España', visita:'Cabo Verde' },
+  { id:'H2', fase:'grupos', grupo:'H', fechaISO:'2026-06-15T22:00:00Z', fecha:'15 Jun', hora:'19:00', sede:'Miami', local:'Arabia Saudita', visita:'Uruguay' },
+  { id:'H3', fase:'grupos', grupo:'H', fechaISO:'2026-06-21T16:00:00Z', fecha:'21 Jun', hora:'13:00', sede:'Atlanta', local:'España', visita:'Arabia Saudita' },
+  { id:'H4', fase:'grupos', grupo:'H', fechaISO:'2026-06-21T22:00:00Z', fecha:'21 Jun', hora:'19:00', sede:'Miami', local:'Uruguay', visita:'Cabo Verde' },
+  { id:'H5', fase:'grupos', grupo:'H', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Atlanta', local:'España', visita:'Uruguay' },
+  { id:'H6', fase:'grupos', grupo:'H', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Miami', local:'Cabo Verde', visita:'Arabia Saudita' },
   // ── GRUPO I ──
-  { id:'I1', fase:'grupos', grupo:'I', fechaISO:'2026-06-13T04:00:00Z', fecha:'13 Jun', hora:'01:00', sede:'Dallas', local:'Australia', visita:'Turquía' },
-  { id:'I2', fase:'grupos', grupo:'I', fechaISO:'2026-06-13T01:00:00Z', fecha:'12 Jun', hora:'22:00', sede:'Los Ángeles', local:'Estados Unidos', visita:'Paraguay' },
-  { id:'I3', fase:'grupos', grupo:'I', fechaISO:'2026-06-19T19:00:00Z', fecha:'19 Jun', hora:'16:00', sede:'Los Ángeles', local:'Estados Unidos', visita:'Australia' },
-  { id:'I4', fase:'grupos', grupo:'I', fechaISO:'2026-06-20T04:00:00Z', fecha:'19 Jun', hora:'01:00', sede:'Dallas', local:'Turquía', visita:'Paraguay' },
-  { id:'I5', fase:'grupos', grupo:'I', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Los Ángeles', local:'Estados Unidos', visita:'Turquía' },
-  { id:'I6', fase:'grupos', grupo:'I', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Dallas', local:'Australia', visita:'Paraguay' },
+  { id:'I1', fase:'grupos', grupo:'I', fechaISO:'2026-06-16T19:00:00Z', fecha:'16 Jun', hora:'16:00', sede:'Nueva Jersey', local:'Francia', visita:'Senegal' },
+  { id:'I2', fase:'grupos', grupo:'I', fechaISO:'2026-06-16T22:00:00Z', fecha:'16 Jun', hora:'19:00', sede:'Boston', local:'Irak', visita:'Noruega' },
+  { id:'I3', fase:'grupos', grupo:'I', fechaISO:'2026-06-22T21:00:00Z', fecha:'22 Jun', hora:'18:00', sede:'Philadelphia', local:'Francia', visita:'Irak' },
+  { id:'I4', fase:'grupos', grupo:'I', fechaISO:'2026-06-23T00:00:00Z', fecha:'22 Jun', hora:'21:00', sede:'Nueva Jersey', local:'Noruega', visita:'Senegal' },
+  { id:'I5', fase:'grupos', grupo:'I', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Nueva Jersey', local:'Francia', visita:'Noruega' },
+  { id:'I6', fase:'grupos', grupo:'I', fechaISO:'2026-06-27T23:00:00Z', fecha:'27 Jun', hora:'20:00', sede:'Boston', local:'Senegal', visita:'Irak' },
   // ── GRUPO J ──
-  { id:'J1', fase:'grupos', grupo:'J', fechaISO:'2026-06-17T01:00:00Z', fecha:'16 Jun', hora:'22:00', sede:'Dallas', local:'Argentina', visita:'Argelia' },
-  { id:'J2', fase:'grupos', grupo:'J', fechaISO:'2026-06-17T04:00:00Z', fecha:'16 Jun', hora:'01:00', sede:'Seattle', local:'Austria', visita:'Jordania' },
-  { id:'J3', fase:'grupos', grupo:'J', fechaISO:'2026-06-22T17:00:00Z', fecha:'22 Jun', hora:'14:00', sede:'Seattle', local:'Argentina', visita:'Austria' },
-  { id:'J4', fase:'grupos', grupo:'J', fechaISO:'2026-06-22T03:00:00Z', fecha:'22 Jun', hora:'00:00', sede:'Dallas', local:'Jordania', visita:'Argelia' },
-  { id:'J5', fase:'grupos', grupo:'J', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Dallas', local:'Jordania', visita:'Argentina' },
-  { id:'J6', fase:'grupos', grupo:'J', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Seattle', local:'Argelia', visita:'Austria' },
+  { id:'J1', fase:'grupos', grupo:'J', fechaISO:'2026-06-17T01:00:00Z', fecha:'16 Jun', hora:'22:00', sede:'Kansas City', local:'Argentina', visita:'Argelia' },
+  { id:'J2', fase:'grupos', grupo:'J', fechaISO:'2026-06-17T04:00:00Z', fecha:'17 Jun', hora:'01:00', sede:'San Francisco', local:'Austria', visita:'Jordania' },
+  { id:'J3', fase:'grupos', grupo:'J', fechaISO:'2026-06-22T17:00:00Z', fecha:'22 Jun', hora:'14:00', sede:'Dallas', local:'Argentina', visita:'Austria' },
+  { id:'J4', fase:'grupos', grupo:'J', fechaISO:'2026-06-23T03:00:00Z', fecha:'22 Jun', hora:'00:00', sede:'San Francisco', local:'Jordania', visita:'Argelia' },
+  { id:'J5', fase:'grupos', grupo:'J', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Kansas City', local:'Jordania', visita:'Argentina' },
+  { id:'J6', fase:'grupos', grupo:'J', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Dallas', local:'Argelia', visita:'Austria' },
   // ── GRUPO K ──
-  { id:'K1', fase:'grupos', grupo:'K', fechaISO:'2026-06-17T17:00:00Z', fecha:'17 Jun', hora:'14:00', sede:'Houston', local:'Portugal', visita:'Uzbekistán' },
-  { id:'K2', fase:'grupos', grupo:'K', fechaISO:'2026-06-18T02:00:00Z', fecha:'17 Jun', hora:'23:00', sede:'Atlanta', local:'Colombia', visita:'RD del Congo' },
-  { id:'K3', fase:'grupos', grupo:'K', fechaISO:'2026-06-23T17:00:00Z', fecha:'23 Jun', hora:'14:00', sede:'Houston', local:'Portugal', visita:'Colombia' },
-  { id:'K4', fase:'grupos', grupo:'K', fechaISO:'2026-06-24T02:00:00Z', fecha:'23 Jun', hora:'23:00', sede:'Atlanta', local:'Uzbekistán', visita:'RD del Congo' },
-  { id:'K5', fase:'grupos', grupo:'K', fechaISO:'2026-06-27T23:30:00Z', fecha:'27 Jun', hora:'20:30', sede:'Houston', local:'Colombia', visita:'Portugal' },
-  { id:'K6', fase:'grupos', grupo:'K', fechaISO:'2026-06-27T23:30:00Z', fecha:'27 Jun', hora:'20:30', sede:'Atlanta', local:'RD del Congo', visita:'Uzbekistán' },
+  { id:'K1', fase:'grupos', grupo:'K', fechaISO:'2026-06-17T17:00:00Z', fecha:'17 Jun', hora:'14:00', sede:'Houston', local:'Portugal', visita:'RD del Congo' },
+  { id:'K2', fase:'grupos', grupo:'K', fechaISO:'2026-06-18T02:00:00Z', fecha:'17 Jun', hora:'23:00', sede:'Ciudad de México', local:'Uzbekistán', visita:'Colombia' },
+  { id:'K3', fase:'grupos', grupo:'K', fechaISO:'2026-06-23T17:00:00Z', fecha:'23 Jun', hora:'14:00', sede:'Houston', local:'Portugal', visita:'Uzbekistán' },
+  { id:'K4', fase:'grupos', grupo:'K', fechaISO:'2026-06-24T02:00:00Z', fecha:'23 Jun', hora:'23:00', sede:'Guadalajara', local:'Colombia', visita:'RD del Congo' },
+  { id:'K5', fase:'grupos', grupo:'K', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Houston', local:'Portugal', visita:'Colombia' },
+  { id:'K6', fase:'grupos', grupo:'K', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Ciudad de México', local:'RD del Congo', visita:'Uzbekistán' },
   // ── GRUPO L ──
-  { id:'L1', fase:'grupos', grupo:'L', fechaISO:'2026-06-17T20:00:00Z', fecha:'17 Jun', hora:'17:00', sede:'Nueva York', local:'Inglaterra', visita:'Croacia' },
-  { id:'L2', fase:'grupos', grupo:'L', fechaISO:'2026-06-17T23:00:00Z', fecha:'17 Jun', hora:'20:00', sede:'Boston', local:'Ghana', visita:'Panamá' },
+  { id:'L1', fase:'grupos', grupo:'L', fechaISO:'2026-06-17T20:00:00Z', fecha:'17 Jun', hora:'17:00', sede:'Dallas', local:'Inglaterra', visita:'Croacia' },
+  { id:'L2', fase:'grupos', grupo:'L', fechaISO:'2026-06-17T23:00:00Z', fecha:'17 Jun', hora:'20:00', sede:'Toronto', local:'Ghana', visita:'Panamá' },
   { id:'L3', fase:'grupos', grupo:'L', fechaISO:'2026-06-23T20:00:00Z', fecha:'23 Jun', hora:'17:00', sede:'Boston', local:'Inglaterra', visita:'Ghana' },
-  { id:'L4', fase:'grupos', grupo:'L', fechaISO:'2026-06-23T23:00:00Z', fecha:'23 Jun', hora:'20:00', sede:'Nueva York', local:'Panamá', visita:'Croacia' },
-  { id:'L5', fase:'grupos', grupo:'L', fechaISO:'2026-06-27T21:00:00Z', fecha:'27 Jun', hora:'18:00', sede:'Nueva York', local:'Panamá', visita:'Inglaterra' },
-  { id:'L6', fase:'grupos', grupo:'L', fechaISO:'2026-06-27T21:00:00Z', fecha:'27 Jun', hora:'18:00', sede:'Boston', local:'Croacia', visita:'Ghana' },
-  // ── 1/16 (se completan cuando clasifican los equipos) ──
+  { id:'L4', fase:'grupos', grupo:'L', fechaISO:'2026-06-23T23:00:00Z', fecha:'23 Jun', hora:'20:00', sede:'Toronto', local:'Panamá', visita:'Croacia' },
+  { id:'L5', fase:'grupos', grupo:'L', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Dallas', local:'Inglaterra', visita:'Panamá' },
+  { id:'L6', fase:'grupos', grupo:'L', fechaISO:'2026-06-28T02:00:00Z', fecha:'27 Jun', hora:'23:00', sede:'Boston', local:'Croacia', visita:'Ghana' },
+  // ── 1/16 ──
   { id:'R1', fase:'1/16', fechaISO:'2026-07-04T22:00:00Z', fecha:'4 Jul', hora:'19:00', sede:'Dallas', local:'TBD', visita:'TBD' },
   { id:'R2', fase:'1/16', fechaISO:'2026-07-05T01:00:00Z', fecha:'4 Jul', hora:'22:00', sede:'Los Ángeles', local:'TBD', visita:'TBD' },
   { id:'R3', fase:'1/16', fechaISO:'2026-07-05T22:00:00Z', fecha:'5 Jul', hora:'19:00', sede:'Nueva York', local:'TBD', visita:'TBD' },
@@ -247,9 +237,9 @@ export const PARTIDOS: Partido[] = [
   { id:'S1', fase:'semis', fechaISO:'2026-07-26T22:00:00Z', fecha:'26 Jul', hora:'19:00', sede:'Dallas', local:'TBD', visita:'TBD' },
   { id:'S2', fase:'semis', fechaISO:'2026-07-27T22:00:00Z', fecha:'27 Jul', hora:'19:00', sede:'Nueva York', local:'TBD', visita:'TBD' },
   // ── 3ER PUESTO ──
-  { id:'TP', fase:'3er_puesto', fechaISO:'2026-08-01T22:00:00Z', fecha:'1 Ago', hora:'19:00', sede:'Miami', local:'TBD', visita:'TBD' },
+  { id:'TP', fase:'3er_puesto', fechaISO:'2026-07-19T22:00:00Z', fecha:'19 Jul', hora:'19:00', sede:'Miami', local:'TBD', visita:'TBD' },
   // ── FINAL ──
-  { id:'F', fase:'final', fechaISO:'2026-08-02T22:00:00Z', fecha:'2 Ago', hora:'19:00', sede:'Nueva York', local:'TBD', visita:'TBD' },
+  { id:'F', fase:'final', fechaISO:'2026-07-20T01:00:00Z', fecha:'19 Jul', hora:'22:00', sede:'Nueva York', local:'TBD', visita:'TBD' },
 ];
 
 export const GRUPOS_LIST = ['A','B','C','D','E','F','G','H','I','J','K','L'];
