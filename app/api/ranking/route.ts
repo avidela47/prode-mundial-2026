@@ -10,58 +10,63 @@ function calcSigno(gl: number, gv: number): '1' | 'X' | '2' {
   return '2';
 }
 
+interface Jugador { id: string; nombre: string; color: string; esAdmin: boolean; }
+interface Pred { jugadorId: string; partidoId: string; valor: string; }
+interface Resultado { partidoId: string; gl: number; gv: number; }
+
 export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db(DB);
 
-    const [jugadores, predicciones, resultados] = await Promise.all([
+    const [jugadoresRaw, predsRaw, resRaw] = await Promise.all([
       db.collection('jugadores').find({}).toArray(),
       db.collection('predicciones').find({}).toArray(),
       db.collection('resultados').find({}).toArray(),
     ]);
 
-    // Mapa de resultados { partidoId: { gl, gv, signo } }
+    const jugadores = jugadoresRaw as unknown as Jugador[];
+    const predicciones = predsRaw as unknown as Pred[];
+    const resultados = resRaw as unknown as Resultado[];
+
     const resMap: Record<string, { gl: number; gv: number; signo: '1' | 'X' | '2' }> = {};
     for (const r of resultados) {
       resMap[r.partidoId] = { gl: r.gl, gv: r.gv, signo: calcSigno(r.gl, r.gv) };
     }
 
-    const ranking = jugadores.map(j => {
-      const misPreds = predicciones.filter(p => p.jugadorId === j.id);
-      let puntos = 0, aciertos = 0, jugados = 0;
+    const ranking = jugadores
+      .filter(j => !j.esAdmin)
+      .map(j => {
+        const misPreds = predicciones.filter(p => p.jugadorId === j.id);
+        let puntos = 0, aciertos = 0, jugados = 0;
 
-      for (const pred of misPreds) {
-        const res = resMap[pred.partidoId];
-        if (!res) continue;
-        jugados++;
+        for (const pred of misPreds) {
+          const res = resMap[pred.partidoId];
+          if (!res) continue;
+          jugados++;
 
-        const partido = PARTIDOS.find(p => p.id === pred.partidoId);
-        const fase = partido?.fase ?? 'grupos';
+          const partido = PARTIDOS.find(p => p.id === pred.partidoId);
+          const fase = partido?.fase ?? 'grupos';
 
-        // Predicción puede ser "2-1" (nuevo) o "1"/"X"/"2" (viejo)
-        if (pred.valor.includes('-')) {
-          const [pGl, pGv] = pred.valor.split('-').map(Number);
-          if (pGl === res.gl && pGv === res.gv) {
-            // Exacto
-            puntos += PUNTOS_EXACTO[fase];
-            aciertos++;
-          } else if (calcSigno(pGl, pGv) === res.signo) {
-            // Solo signo
-            puntos += PUNTOS_SIGNO[fase];
-            aciertos++;
-          }
-        } else {
-          // Formato viejo 1/X/2
-          if (pred.valor === res.signo) {
-            puntos += PUNTOS_SIGNO[fase];
-            aciertos++;
+          if (pred.valor.includes('-')) {
+            const [pGl, pGv] = pred.valor.split('-').map(Number);
+            if (pGl === res.gl && pGv === res.gv) {
+              puntos += PUNTOS_EXACTO[fase];
+              aciertos++;
+            } else if (calcSigno(pGl, pGv) === res.signo) {
+              puntos += PUNTOS_SIGNO[fase];
+              aciertos++;
+            }
+          } else {
+            if (pred.valor === res.signo) {
+              puntos += PUNTOS_SIGNO[fase];
+              aciertos++;
+            }
           }
         }
-      }
 
-      return { id: j.id, nombre: j.nombre, color: j.color, esAdmin: j.esAdmin, puntos, aciertos, jugados };
-    });
+        return { id: j.id, nombre: j.nombre, color: j.color, puntos, aciertos, jugados };
+      });
 
     ranking.sort((a, b) => b.puntos - a.puntos || b.aciertos - a.aciertos);
     return NextResponse.json(ranking);
