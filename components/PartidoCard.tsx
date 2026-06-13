@@ -55,7 +55,7 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           {partido.grupo && <span className="group-pill">{partido.grupo}</span>}
           <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
-            {new Date(partido.fechaISO).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: 'America/Argentina/Buenos_Aires' })} · {new Date(partido.fechaISO).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}hs
+            {new Date(partido.fechaISO).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: 'America/Argentina/Buenos_Aires' })} · {new Date(partido.fechaISO).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' })}hs
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
