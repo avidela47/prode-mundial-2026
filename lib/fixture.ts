@@ -140,7 +140,7 @@ export const PARTIDOS: Partido[] = [
   { id:'C5', fase:'grupos', grupo:'C', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Nueva Jersey', local:'Brasil', visita:'Escocia' },
   { id:'C6', fase:'grupos', grupo:'C', fechaISO:'2026-06-25T23:00:00Z', fecha:'25 Jun', hora:'20:00', sede:'Atlanta', local:'Marruecos', visita:'Haití' },
   // ── GRUPO D ──
-  { id:'D1', fase:'grupos', grupo:'D', fechaISO:'2026-06-13T04:00:00Z', fecha:'13 Jun', hora:'01:00', sede:'Vancouver', local:'Australia', visita:'Turquía' },
+  { id:'D1', fase:'grupos', grupo:'D', fechaISO:'2026-06-14T04:00:00Z', fecha:'14 Jun', hora:'01:00', sede:'Vancouver', local:'Australia', visita:'Turquía' },
   { id:'D2', fase:'grupos', grupo:'D', fechaISO:'2026-06-13T01:00:00Z', fecha:'12 Jun', hora:'22:00', sede:'Los Ángeles', local:'Estados Unidos', visita:'Paraguay' },
   { id:'D3', fase:'grupos', grupo:'D', fechaISO:'2026-06-19T19:00:00Z', fecha:'19 Jun', hora:'16:00', sede:'Seattle', local:'Estados Unidos', visita:'Australia' },
   { id:'D4', fase:'grupos', grupo:'D', fechaISO:'2026-06-20T03:00:00Z', fecha:'19 Jun', hora:'00:00', sede:'San Francisco', local:'Turquía', visita:'Paraguay' },
