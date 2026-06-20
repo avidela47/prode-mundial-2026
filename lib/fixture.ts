@@ -150,7 +150,7 @@ export const PARTIDOS: Partido[] = [
   { id:'E1', fase:'grupos', grupo:'E', fechaISO:'2026-06-14T17:00:00Z', fecha:'14 Jun', hora:'14:00', sede:'Houston', local:'Alemania', visita:'Curazao' },
   { id:'E2', fase:'grupos', grupo:'E', fechaISO:'2026-06-14T23:00:00Z', fecha:'14 Jun', hora:'20:00', sede:'Philadelphia', local:'Costa de Marfil', visita:'Ecuador' },
   { id:'E3', fase:'grupos', grupo:'E', fechaISO:'2026-06-20T20:00:00Z', fecha:'20 Jun', hora:'17:00', sede:'Toronto', local:'Alemania', visita:'Costa de Marfil' },
-  { id:'E4', fase:'grupos', grupo:'E', fechaISO:'2026-06-21T02:00:00Z', fecha:'20 Jun', hora:'23:00', sede:'Kansas City', local:'Ecuador', visita:'Curazao' },
+  { id:'E4', fase:'grupos', grupo:'E', fechaISO:'2026-06-21T00:00:00Z', fecha:'20 Jun', hora:'21:00', sede:'Kansas City', local:'Ecuador', visita:'Curazao' },
   { id:'E5', fase:'grupos', grupo:'E', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Philadelphia', local:'Alemania', visita:'Ecuador' },
   { id:'E6', fase:'grupos', grupo:'E', fechaISO:'2026-06-26T23:00:00Z', fecha:'26 Jun', hora:'20:00', sede:'Toronto', local:'Costa de Marfil', visita:'Curazao' },
   // ── GRUPO F ──
