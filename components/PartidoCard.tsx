@@ -46,22 +46,25 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
   }
 
   return (
-    <div className="card fade-up" style={{
+    <div style={{
+      background: '#fff',
+      border: `1px solid ${esExacto ? '#A7F3D0' : esError ? '#FECACA' : '#E5E7EB'}`,
+      borderRadius: 12,
       padding: '12px 14px',
-      borderColor: esExacto ? 'rgba(201,168,76,0.5)' : esSigno ? 'rgba(0,154,85,0.4)' : esError ? 'rgba(200,16,46,0.3)' : undefined,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
     }}>
       {/* Meta */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           {partido.grupo && <span className="group-pill">{partido.grupo}</span>}
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>
             {new Date(partido.fechaISO).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: 'America/Argentina/Buenos_Aires' })} · {new Date(partido.fechaISO).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' })}hs
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {bloqueado && !resultado && !readOnly && (
-            <span style={{ fontSize: 10, color: '#FF6B00', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
-              🔒 Cierra {horaCierre(partido)}hs
+            <span style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, background: '#FEF3C7', padding: '2px 6px', borderRadius: 4 }}>
+              🔒 {horaCierre(partido)}hs
             </span>
           )}
           <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{partido.sede}</span>
@@ -70,19 +73,14 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
 
       {/* Equipos */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-
-        {/* Local */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
           <FlagImg equipo={partido.local} size={28} />
-          <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text)' }}>
             {partido.local}
           </span>
         </div>
 
-        {/* Centro */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-
-          {/* Admin: inputs para cargar resultado */}
           {showResultInput && jugadorActivo?.esAdmin ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -96,20 +94,19 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
               </div>
               {resultado && (
                 <button onClick={() => deleteResultado(partido.id)}
-                  style={{ fontSize: 10, color: '#FF4D6D', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontWeight: 700 }}>
-                  ✕ Borrar resultado
+                  style={{ fontSize: 10, color: 'var(--red)', background: '#FEE2E2', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }}>
+                  ✕ Borrar
                 </button>
               )}
             </div>
           ) : resultado ? (
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gold)', fontFamily: 'Bebas Neue', letterSpacing: 2, padding: '0 4px' }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--blue)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: 2, padding: '0 4px' }}>
               {resultado.gl} - {resultado.gv}
             </div>
           ) : (
-            <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, padding: '0 4px' }}>VS</span>
+            <span style={{ color: '#D1D5DB', fontSize: 12, fontWeight: 700, padding: '0 4px' }}>VS</span>
           )}
 
-          {/* Inputs predicción — solo fixture, no readOnly */}
           {!showResultInput && !readOnly && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <input className="score-input" type="number" min={0} max={20}
@@ -122,7 +119,7 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
                 }}
                 style={{ opacity: !puedeApostar ? 0.4 : 1, cursor: !puedeApostar ? 'not-allowed' : 'text', fontSize: 18 }}
               />
-              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 14 }}>-</span>
+              <span style={{ color: '#D1D5DB', fontWeight: 700, fontSize: 14 }}>-</span>
               <input className="score-input" type="number" min={0} max={20}
                 value={visitaInput} placeholder="0" disabled={!puedeApostar}
                 onChange={e => setVisitaInput(e.target.value)}
@@ -136,30 +133,26 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
             </div>
           )}
 
-          {/* Apuesta guardada */}
           {!showResultInput && predRaw && (
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Barlow Condensed', fontWeight: 600 }}>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 500 }}>
               Tu apuesta: {predRaw}
             </span>
           )}
         </div>
 
-        {/* Visita */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, flexDirection: 'row-reverse', minWidth: 0 }}>
           <FlagImg equipo={partido.visita} size={28} />
-          <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.2, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.2, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text)' }}>
             {partido.visita}
           </span>
         </div>
       </div>
 
-      {/* Badge */}
       {(esExacto || esSigno || esError) && (
         <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
           <span className="badge" style={{
-            background: esExacto ? 'rgba(201,168,76,0.2)' : esSigno ? 'rgba(0,107,60,0.3)' : 'rgba(200,16,46,0.2)',
-            color: esExacto ? 'var(--gold)' : esSigno ? '#00D46A' : '#FF4D6D',
-            border: `1px solid ${esExacto ? 'rgba(201,168,76,0.4)' : esSigno ? 'rgba(0,212,106,0.3)' : 'rgba(255,77,109,0.3)'}`,
+            background: esExacto ? '#D1FAE5' : esSigno ? '#DBEAFE' : '#FEE2E2',
+            color: esExacto ? '#065F46' : esSigno ? '#1E40AF' : '#991B1B',
           }}>
             {esExacto ? '★ Exacto +5pts' : esSigno ? '✓ Signo +3pts' : '✗ Error'}
           </span>
