@@ -35,7 +35,7 @@ export function TablaTab() {
     cargarRanking().catch(console.error);
   }, []);
 
-  const totalPartidos = PARTIDOS.filter(p => p.fase === 'grupos' || p.fase === '1/16').length;
+  const totalPartidos = PARTIDOS.length;
 
   return (
     <div>
