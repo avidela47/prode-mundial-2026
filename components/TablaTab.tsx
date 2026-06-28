@@ -30,17 +30,21 @@ export function TablaTab() {
     setJugados(resData.length);
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { void cargarRanking(); }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarRanking().catch(console.error);
+  }, []);
+
+  const totalPartidos = PARTIDOS.filter(p => p.fase === 'grupos' || p.fase === '1/16').length;
 
   return (
     <div>
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 28 }}>
         {[
-          { label: 'Partidos jugados', value: jugados, of: PARTIDOS.length },
+          { label: 'Partidos jugados', value: jugados, of: totalPartidos },
           { label: 'Participantes', value: ranking.length },
-          { label: 'Puntos en juego', value: (PARTIDOS.length - jugados) * 3 },
+          { label: 'Partidos restantes', value: totalPartidos - jugados },
         ].map((s, i) => (
           <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 12px' }}>
             <div style={{ fontFamily: 'Bebas Neue', fontSize: 28, color: 'var(--gold)', lineHeight: 1 }}>
@@ -53,7 +57,7 @@ export function TablaTab() {
 
       {/* Ranking */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
-        <div className="ranking-grid" style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border)', fontSize: 11, fontFamily: 'Barlow Condensed', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+        <div className="ranking-grid" style={{ padding: '10px 16px', background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid var(--border)', fontSize: 11, fontFamily: 'Barlow Condensed', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
           <div>#</div>
           <div>Participante</div>
           <div style={{ textAlign: 'center' }}>Jugados</div>
@@ -62,7 +66,7 @@ export function TablaTab() {
         </div>
 
         {ranking.map((j, i) => (
-          <div key={j.id} className="ranking-grid" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: i === 0 && j.puntos > 0 ? 'rgba(201,168,76,0.06)' : undefined }}>
+          <div key={j.id} className="ranking-grid" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: i === 0 && j.puntos > 0 ? 'rgba(245,158,11,0.06)' : undefined }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {i === 0 && j.puntos > 0 ? '🥇' : i === 1 && j.puntos > 0 ? '🥈' : i === 2 && j.puntos > 0 ? '🥉' : (
                 <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>{i + 1}</span>
@@ -72,12 +76,11 @@ export function TablaTab() {
               <div style={{ width: 30, height: 30, borderRadius: '50%', background: `${j.color}22`, border: `1px solid ${j.color}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: j.color, flexShrink: 0 }}>
                 {j.nombre.substring(0, 2).toUpperCase()}
               </div>
-              <span style={{ fontWeight: 600, fontSize: 13 }}>{j.nombre}</span>
-              {j.esAdmin && <span className="badge" style={{ background: 'rgba(201,168,76,0.15)', color: 'var(--gold)', border: '1px solid rgba(201,168,76,0.3)' }}>Admin</span>}
-              {jugadorActivo?.id === j.id && <span className="badge" style={{ background: 'rgba(0,154,85,0.15)', color: '#00D46A', border: '1px solid rgba(0,212,106,0.3)' }}>Vos</span>}
+              <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{j.nombre}</span>
+              {jugadorActivo?.id === j.id && <span className="badge" style={{ background: '#DBEAFE', color: '#1E40AF' }}>Vos</span>}
             </div>
             <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{j.jugados}</div>
-            <div style={{ textAlign: 'center', fontSize: 13, color: '#00D46A' }}>{j.aciertos}</div>
+            <div style={{ textAlign: 'center', fontSize: 13, color: '#10B981', fontWeight: 600 }}>{j.aciertos}</div>
             <div style={{ textAlign: 'center', fontFamily: 'Bebas Neue', fontSize: 22, color: i === 0 && j.puntos > 0 ? 'var(--gold)' : 'var(--text)' }}>{j.puntos}</div>
           </div>
         ))}
@@ -90,7 +93,7 @@ export function TablaTab() {
       </div>
 
       <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>
-        Grupos: 3pts · 1/16 y Octavos: 5pts · Cuartos y Semis: 8pts · Final: 10pts
+        Grupos: exacto 5pts / signo 3pts · 1/16: exacto 8pts / signo 5pts
       </div>
     </div>
   );
