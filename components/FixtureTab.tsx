@@ -5,6 +5,7 @@ import { PartidoCard } from './PartidoCard';
 import { useProdeStore } from '@/lib/store';
 
 export function FixtureTab() {
+  const [seccion, setSeccion] = useState<'grupos' | '1/16'>('grupos');
   const [grupoActivo, setGrupoActivo] = useState<string>('hoy');
   const { init } = useProdeStore();
 
@@ -13,77 +14,106 @@ export function FixtureTab() {
 
   function esHoy(fechaISO: string): boolean {
     const ahora = new Date();
-    const partido = new Date(fechaISO);
-    // Comparar en hora Argentina (UTC-3)
     const ahoraARG = new Date(ahora.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-    const partidoARG = new Date(partido.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+    const partidoARG = new Date(new Date(fechaISO).toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
     return ahoraARG.getDate() === partidoARG.getDate() &&
       ahoraARG.getMonth() === partidoARG.getMonth() &&
       ahoraARG.getFullYear() === partidoARG.getFullYear();
   }
 
-  const filtrados = grupoActivo === 'todos'
+  const partidos16 = PARTIDOS.filter(p => p.fase === '1/16');
+
+  const filtrados = seccion === '1/16'
+    ? partidos16
+    : grupoActivo === 'todos'
     ? PARTIDOS.filter(p => p.fase === 'grupos')
     : grupoActivo === 'hoy'
-    ? PARTIDOS.filter(p => p.fase === 'grupos' && esHoy(p.fechaISO))
+    ? PARTIDOS.filter(p => (p.fase === 'grupos' || p.fase === '1/16') && esHoy(p.fechaISO))
     : PARTIDOS.filter(p => p.grupo === grupoActivo);
 
   const porGrupo: Record<string, Partido[]> = {};
-  filtrados.forEach(p => {
-    const key = p.grupo ?? 'SIN GRUPO';
-    if (!porGrupo[key]) porGrupo[key] = [];
-    porGrupo[key].push(p);
-  });
+  if (seccion === 'grupos' && grupoActivo !== 'hoy') {
+    filtrados.forEach(p => {
+      const key = p.grupo ?? 'SIN GRUPO';
+      if (!porGrupo[key]) porGrupo[key] = [];
+      porGrupo[key].push(p);
+    });
+  }
 
   return (
     <div>
-      <div style={{
-        display: 'flex', gap: 6,
-        overflowX: 'auto', paddingBottom: 10, marginBottom: 20,
-        scrollbarWidth: 'none',
-        WebkitOverflowScrolling: 'touch',
-      }}>
-        <button className={`filter-btn${grupoActivo === 'hoy' ? ' active' : ''}`}
-          onClick={() => setGrupoActivo('hoy')}>
-          HOY
+      {/* Sección grupos / 1/16 */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <button onClick={() => { setSeccion('grupos'); setGrupoActivo('hoy'); }}
+          style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            borderColor: seccion === 'grupos' ? 'var(--blue)' : 'var(--border)',
+            background: seccion === 'grupos' ? 'var(--blue)' : '#fff',
+            color: seccion === 'grupos' ? '#fff' : 'var(--text-muted)',
+          }}>
+          FASE DE GRUPOS
         </button>
-        <button className={`filter-btn${grupoActivo === 'todos' ? ' active' : ''}`}
-          onClick={() => setGrupoActivo('todos')}>
-          TODOS
+        <button onClick={() => setSeccion('1/16')}
+          style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            borderColor: seccion === '1/16' ? 'var(--blue)' : 'var(--border)',
+            background: seccion === '1/16' ? 'var(--blue)' : '#fff',
+            color: seccion === '1/16' ? '#fff' : 'var(--text-muted)',
+          }}>
+          16AVOS
         </button>
-        {GRUPOS_LIST.map(g => (
-          <button key={g}
-            className={`filter-btn${grupoActivo === g ? ' active' : ''}`}
-            onClick={() => setGrupoActivo(g)}>
-            {g}
-          </button>
-        ))}
       </div>
 
-      {filtrados.length === 0 && grupoActivo === 'hoy' && (
+      {/* Filtros grupos */}
+      {seccion === 'grupos' && (
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 10, marginBottom: 20, scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <button className={`filter-btn${grupoActivo === 'hoy' ? ' active' : ''}`} onClick={() => setGrupoActivo('hoy')}>HOY</button>
+          <button className={`filter-btn${grupoActivo === 'todos' ? ' active' : ''}`} onClick={() => setGrupoActivo('todos')}>TODOS</button>
+          {GRUPOS_LIST.map(g => (
+            <button key={g} className={`filter-btn${grupoActivo === g ? ' active' : ''}`} onClick={() => setGrupoActivo(g)}>{g}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Sin partidos hoy */}
+      {filtrados.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: 14 }}>
           No hay partidos hoy
         </div>
       )}
 
-      {Object.entries(porGrupo).map(([grupo, ps]) => (
+      {/* 16avos — lista directa */}
+      {seccion === '1/16' && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ background: 'var(--blue)', color: '#fff', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, padding: '3px 10px', borderRadius: 6 }}>1/16</span>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text)' }}>ELIMINACIÓN DIRECTA</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
+            {partidos16.map(p => <PartidoCard key={p.id} partido={p} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Grupos — por grupo */}
+      {seccion === 'grupos' && grupoActivo !== 'hoy' && Object.entries(porGrupo).map(([grupo, ps]) => (
         <div key={grupo} style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span className="group-pill">{grupo}</span>
-            <span style={{ fontFamily: 'Bebas Neue', fontSize: 18, letterSpacing: '0.05em' }}>
-              GRUPO {grupo}
-            </span>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.05em' }}>GRUPO {grupo}</span>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
-            gap: 8,
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
             {ps.map(p => <PartidoCard key={p.id} partido={p} />)}
           </div>
         </div>
       ))}
+
+      {/* HOY — lista directa */}
+      {seccion === 'grupos' && grupoActivo === 'hoy' && filtrados.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
+          {filtrados.map(p => <PartidoCard key={p.id} partido={p} />)}
+        </div>
+      )}
     </div>
   );
 }
