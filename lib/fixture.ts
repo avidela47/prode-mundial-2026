@@ -210,7 +210,7 @@ export const PARTIDOS: Partido[] = [
   { id: "R1", fase: "1/16", fechaISO: "2026-06-28T19:00:00Z", fecha: "28 Jun", hora: "16:00", sede: "TBD", local: "Sudáfrica", visita: "Canadá" },
   { id: "R2", fase: "1/16", fechaISO: "2026-06-29T17:00:00Z", fecha: "29 Jun", hora: "14:00", sede: "TBD", local: "Brasil", visita: "Japón" },
   { id: "R3", fase: "1/16", fechaISO: "2026-06-29T20:30:00Z", fecha: "29 Jun", hora: "17:30", sede: "TBD", local: "Alemania", visita: "Paraguay" },
-  { id: "R4", fase: "1/16", fechaISO: "2026-06-29T13:00:00Z", fecha: "29 Jun", hora: "10:00", sede: "TBD", local: "Países Bajos", visita: "Marruecos" },
+  { id: "R4", fase: "1/16", fechaISO: "2026-06-30T01:00:00Z", fecha: "29 Jun", hora: "22:00", sede: "TBD", local: "Países Bajos", visita: "Marruecos" },
   { id: "R5", fase: "1/16", fechaISO: "2026-06-30T17:00:00Z", fecha: "30 Jun", hora: "14:00", sede: "TBD", local: "Costa de Marfil", visita: "Noruega" },
   { id: "R6", fase: "1/16", fechaISO: "2026-06-30T21:00:00Z", fecha: "30 Jun", hora: "18:00", sede: "TBD", local: "Francia", visita: "Suecia" },
   { id: "R7", fase: "1/16", fechaISO: "2026-07-01T01:00:00Z", fecha: "30 Jun", hora: "22:00", sede: "TBD", local: "México", visita: "Ecuador" },
