@@ -154,7 +154,11 @@ export function PartidoCard({ partido, showResultInput = false, readOnly = false
             background: esExacto ? '#D1FAE5' : esSigno ? '#DBEAFE' : '#FEE2E2',
             color: esExacto ? '#065F46' : esSigno ? '#1E40AF' : '#991B1B',
           }}>
-            {esExacto ? '★ Exacto +5pts' : esSigno ? '✓ Signo +3pts' : '✗ Error'}
+            {esExacto
+  ? `★ Exacto +${PUNTOS_EXACTO[partido.fase]}pts`
+  : esSigno
+  ? `✓ Signo +${PUNTOS_SIGNO[partido.fase]}pts`
+  : '✗ Error'}
           </span>
         </div>
       )}

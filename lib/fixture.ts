@@ -31,9 +31,9 @@ export const PUNTOS_SIGNO: Record<Fase, number> = {
   "1/16": 5,
   octavos: 5,
   cuartos: 8,
-  semis: 8,
-  "3er_puesto": 10,
-  final: 10,
+  semis: 15,
+  "3er_puesto": 15,
+  final: 25,
 };
 
 export const PUNTOS_EXACTO: Record<Fase, number> = {
@@ -41,9 +41,9 @@ export const PUNTOS_EXACTO: Record<Fase, number> = {
   "1/16": 8,
   octavos: 8,
   cuartos: 12,
-  semis: 12,
-  "3er_puesto": 15,
-  final: 15,
+  semis: 20,
+  "3er_puesto": 20,
+  final: 30,
 };
 
 export type EstadoApuesta = "muy_temprano" | "abierto" | "cerrado";
