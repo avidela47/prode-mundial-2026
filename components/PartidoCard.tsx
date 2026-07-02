@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { FlagImg } from './FlagImg';
 import { useProdeStore } from '@/lib/store';
-import { getEstadoApuesta, horaCierre, type Partido } from '@/lib/fixture';
+import { getEstadoApuesta, horaCierre, PUNTOS_EXACTO, PUNTOS_SIGNO, type Partido } from '@/lib/fixture';
+
 
 interface Props {
   partido: Partido;
