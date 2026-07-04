@@ -5,7 +5,7 @@ import { PartidoCard } from './PartidoCard';
 import { useProdeStore } from '@/lib/store';
 
 export function FixtureTab() {
-  const [seccion, setSeccion] = useState<'grupos' | '1/16'>('grupos');
+  const [seccion, setSeccion] = useState<'grupos' | '1/16' | 'octavos'>('grupos');
   const [grupoActivo, setGrupoActivo] = useState<string>('hoy');
   const { init } = useProdeStore();
 
@@ -22,13 +22,16 @@ export function FixtureTab() {
   }
 
   const partidos16 = PARTIDOS.filter(p => p.fase === '1/16');
+  const partidosOctavos = PARTIDOS.filter(p => p.fase === 'octavos');
 
   const filtrados = seccion === '1/16'
     ? partidos16
+    : seccion === 'octavos'
+    ? partidosOctavos
     : grupoActivo === 'todos'
     ? PARTIDOS.filter(p => p.fase === 'grupos')
     : grupoActivo === 'hoy'
-    ? PARTIDOS.filter(p => (p.fase === 'grupos' || p.fase === '1/16') && esHoy(p.fechaISO))
+    ? PARTIDOS.filter(p => (p.fase === 'grupos' || p.fase === '1/16' || p.fase === 'octavos') && esHoy(p.fechaISO))
     : PARTIDOS.filter(p => p.grupo === grupoActivo);
 
   const porGrupo: Record<string, Partido[]> = {};
@@ -42,8 +45,8 @@ export function FixtureTab() {
 
   return (
     <div>
-      {/* Sección grupos / 1/16 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      {/* Sección grupos / 1/16 / octavos */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button onClick={() => { setSeccion('grupos'); setGrupoActivo('hoy'); }}
           style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
             borderColor: seccion === 'grupos' ? 'var(--blue)' : 'var(--border)',
@@ -60,6 +63,14 @@ export function FixtureTab() {
           }}>
           16AVOS
         </button>
+        <button onClick={() => setSeccion('octavos')}
+          style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            borderColor: seccion === 'octavos' ? 'var(--blue)' : 'var(--border)',
+            background: seccion === 'octavos' ? 'var(--blue)' : '#fff',
+            color: seccion === 'octavos' ? '#fff' : 'var(--text-muted)',
+          }}>
+          OCTAVOS
+        </button>
       </div>
 
       {/* Filtros grupos */}
@@ -73,15 +84,15 @@ export function FixtureTab() {
         </div>
       )}
 
-      {/* Sin partidos hoy */}
+      {/* Sin partidos */}
       {filtrados.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: 14 }}>
-          No hay partidos hoy
+          No hay partidos {seccion === 'grupos' && grupoActivo === 'hoy' ? 'hoy' : ''}
         </div>
       )}
 
       {/* 16avos — lista directa */}
-      {seccion === '1/16' && (
+      {seccion === '1/16' && filtrados.length > 0 && (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <span style={{ background: 'var(--blue)', color: '#fff', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, padding: '3px 10px', borderRadius: 6 }}>1/16</span>
@@ -90,6 +101,20 @@ export function FixtureTab() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
             {partidos16.map(p => <PartidoCard key={p.id} partido={p} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Octavos — lista directa */}
+      {seccion === 'octavos' && filtrados.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ background: 'var(--blue)', color: '#fff', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, padding: '3px 10px', borderRadius: 6 }}>8vos</span>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text)' }}>OCTAVOS DE FINAL</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
+            {partidosOctavos.map(p => <PartidoCard key={p.id} partido={p} />)}
           </div>
         </div>
       )}
