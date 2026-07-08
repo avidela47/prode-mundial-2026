@@ -233,10 +233,11 @@ export const PARTIDOS: Partido[] = [
   { id: "O7", fase: "octavos", fechaISO: "2026-07-07T16:00:00Z", fecha: "7 Jul", hora: "13:00", sede: "TBD", local: "Argentina", visita: "Egipto" },
   { id: "O8", fase: "octavos", fechaISO: "2026-07-07T20:00:00Z", fecha: "7 Jul", hora: "17:00", sede: "TBD", local: "Suiza", visita: "Colombia" },
   // ── CUARTOS ──
-  { id: "Q1", fase: "cuartos", fechaISO: "2026-07-21T22:00:00Z", fecha: "21 Jul", hora: "19:00", sede: "Nueva York", local: "TBD", visita: "TBD" },
-  { id: "Q2", fase: "cuartos", fechaISO: "2026-07-22T01:00:00Z", fecha: "21 Jul", hora: "22:00", sede: "Los Ángeles", local: "TBD", visita: "TBD" },
-  { id: "Q3", fase: "cuartos", fechaISO: "2026-07-22T22:00:00Z", fecha: "22 Jul", hora: "19:00", sede: "Dallas", local: "TBD", visita: "TBD" },
-  { id: "Q4", fase: "cuartos", fechaISO: "2026-07-23T01:00:00Z", fecha: "22 Jul", hora: "22:00", sede: "Miami", local: "TBD", visita: "TBD" },
+  // ── CUARTOS ──
+  { id: "Q1", fase: "cuartos", fechaISO: "2026-07-09T20:00:00Z", fecha: "9 Jul", hora: "17:00", sede: "TBD", local: "Francia", visita: "Marruecos" },
+  { id: "Q2", fase: "cuartos", fechaISO: "2026-07-10T19:00:00Z", fecha: "10 Jul", hora: "16:00", sede: "TBD", local: "España", visita: "Bélgica" },
+  { id: "Q3", fase: "cuartos", fechaISO: "2026-07-11T21:00:00Z", fecha: "11 Jul", hora: "18:00", sede: "TBD", local: "Noruega", visita: "Inglaterra" },
+  { id: "Q4", fase: "cuartos", fechaISO: "2026-07-12T01:00:00Z", fecha: "11 Jul", hora: "22:00", sede: "TBD", local: "Argentina", visita: "Suiza" },
   // ── SEMIS ──
   { id: "S1", fase: "semis", fechaISO: "2026-07-26T22:00:00Z", fecha: "26 Jul", hora: "19:00", sede: "Dallas", local: "TBD", visita: "TBD" },
   { id: "S2", fase: "semis", fechaISO: "2026-07-27T22:00:00Z", fecha: "27 Jul", hora: "19:00", sede: "Nueva York", local: "TBD", visita: "TBD" },

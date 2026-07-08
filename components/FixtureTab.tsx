@@ -5,7 +5,7 @@ import { PartidoCard } from './PartidoCard';
 import { useProdeStore } from '@/lib/store';
 
 export function FixtureTab() {
-  const [seccion, setSeccion] = useState<'grupos' | '1/16' | 'octavos'>('grupos');
+  const [seccion, setSeccion] = useState<'grupos' | '1/16' | 'octavos' | 'cuartos'>('grupos');
   const [grupoActivo, setGrupoActivo] = useState<string>('hoy');
   const { init } = useProdeStore();
 
@@ -23,15 +23,18 @@ export function FixtureTab() {
 
   const partidos16 = PARTIDOS.filter(p => p.fase === '1/16');
   const partidosOctavos = PARTIDOS.filter(p => p.fase === 'octavos');
+const partidosCuartos = PARTIDOS.filter(p => p.fase === 'cuartos');
 
   const filtrados = seccion === '1/16'
     ? partidos16
     : seccion === 'octavos'
     ? partidosOctavos
+    : seccion === 'cuartos'
+    ? partidosCuartos
     : grupoActivo === 'todos'
     ? PARTIDOS.filter(p => p.fase === 'grupos')
     : grupoActivo === 'hoy'
-    ? PARTIDOS.filter(p => (p.fase === 'grupos' || p.fase === '1/16' || p.fase === 'octavos') && esHoy(p.fechaISO))
+   ? PARTIDOS.filter(p => (p.fase === 'grupos' || p.fase === '1/16' || p.fase === 'octavos' || p.fase === 'cuartos') && esHoy(p.fechaISO))
     : PARTIDOS.filter(p => p.grupo === grupoActivo);
 
   const porGrupo: Record<string, Partido[]> = {};
@@ -63,13 +66,13 @@ export function FixtureTab() {
           }}>
           16AVOS
         </button>
-        <button onClick={() => setSeccion('octavos')}
+        <button onClick={() => setSeccion('cuartos')}
           style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            borderColor: seccion === 'octavos' ? 'var(--blue)' : 'var(--border)',
-            background: seccion === 'octavos' ? 'var(--blue)' : '#fff',
-            color: seccion === 'octavos' ? '#fff' : 'var(--text-muted)',
+            borderColor: seccion === 'cuartos' ? 'var(--blue)' : 'var(--border)',
+            background: seccion === 'cuartos' ? 'var(--blue)' : '#fff',
+            color: seccion === 'cuartos' ? '#fff' : 'var(--text-muted)',
           }}>
-          OCTAVOS
+          CUARTOS
         </button>
       </div>
 
@@ -115,6 +118,19 @@ export function FixtureTab() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
             {partidosOctavos.map(p => <PartidoCard key={p.id} partido={p} />)}
+          </div>
+        </div>
+      )}
+
+      {seccion === 'cuartos' && filtrados.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ background: 'var(--blue)', color: '#fff', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, padding: '3px 10px', borderRadius: 6 }}>4tos</span>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text)' }}>CUARTOS DE FINAL</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
+            {partidosCuartos.map(p => <PartidoCard key={p.id} partido={p} />)}
           </div>
         </div>
       )}
