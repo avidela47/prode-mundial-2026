@@ -244,9 +244,9 @@ export const PARTIDOS: Partido[] = [
   { id: "S2", fase: "semis", fechaISO: "2026-07-15T19:00:00Z", fecha: "15 Jul", hora: "16:00", sede: "TBD", local: "Inglaterra", visita: "Argentina" },
   
   // ── 3ER PUESTO ──
-  { id: "TP", fase: "3er_puesto", fechaISO: "2026-07-19T22:00:00Z", fecha: "19 Jul", hora: "19:00", sede: "Miami", local: "TBD", visita: "TBD" },
+  { id: "TP", fase: "3er_puesto", fechaISO: "2026-07-18T21:00:00Z", fecha: "18 Jul", hora: "18:00", sede: "TBD", local: "Francia", visita: "Inglaterra" },
   // ── FINAL ──
-  { id: "F", fase: "final", fechaISO: "2026-07-20T01:00:00Z", fecha: "19 Jul", hora: "22:00", sede: "Nueva York", local: "TBD", visita: "TBD" },
+  { id: "F", fase: "final", fechaISO: "2026-07-19T19:00:00Z", fecha: "19 Jul", hora: "16:00", sede: "TBD", local: "Argentina", visita: "España" },
 ];
 
 export const GRUPOS_LIST = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];

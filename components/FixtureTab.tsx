@@ -5,7 +5,7 @@ import { PartidoCard } from './PartidoCard';
 import { useProdeStore } from '@/lib/store';
 
 export function FixtureTab() {
-  const [seccion, setSeccion] = useState<'grupos' | '1/16' | 'octavos' | 'cuartos' | 'semis'>('grupos');
+  const [seccion, setSeccion] = useState<'grupos' | '1/16' | 'octavos' | 'cuartos' | 'semis' | '3er_puesto' | 'final'>('grupos');
   const [grupoActivo, setGrupoActivo] = useState<string>('hoy');
   const { init } = useProdeStore();
 
@@ -25,6 +25,12 @@ export function FixtureTab() {
   const partidosOctavos = PARTIDOS.filter(p => p.fase === 'octavos');
   const partidosCuartos = PARTIDOS.filter(p => p.fase === 'cuartos');
   const partidosSemis = PARTIDOS.filter(p => p.fase === 'semis');
+  const partidosTercero = PARTIDOS.filter(p => p.fase === '3er_puesto');
+  const partidosFinal = PARTIDOS.filter(p => p.fase === 'final');
+
+  const todasFases = (p: Partido) =>
+    p.fase === 'grupos' || p.fase === '1/16' || p.fase === 'octavos' ||
+    p.fase === 'cuartos' || p.fase === 'semis' || p.fase === '3er_puesto' || p.fase === 'final';
 
   const filtrados = seccion === '1/16'
     ? partidos16
@@ -34,10 +40,14 @@ export function FixtureTab() {
     ? partidosCuartos
     : seccion === 'semis'
     ? partidosSemis
+    : seccion === '3er_puesto'
+    ? partidosTercero
+    : seccion === 'final'
+    ? partidosFinal
     : grupoActivo === 'todos'
     ? PARTIDOS.filter(p => p.fase === 'grupos')
     : grupoActivo === 'hoy'
-    ? PARTIDOS.filter(p => (p.fase === 'grupos' || p.fase === '1/16' || p.fase === 'octavos' || p.fase === 'cuartos' || p.fase === 'semis') && esHoy(p.fechaISO))
+    ? PARTIDOS.filter(p => todasFases(p) && esHoy(p.fechaISO))
     : PARTIDOS.filter(p => p.grupo === grupoActivo);
 
   const porGrupo: Record<string, Partido[]> = {};
@@ -51,7 +61,7 @@ export function FixtureTab() {
 
   return (
     <div>
-      {/* Sección grupos / 1/16 / octavos / cuartos / semis */}
+      {/* Sección grupos / 1/16 / octavos / cuartos / semis / 3ro / final */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button onClick={() => { setSeccion('grupos'); setGrupoActivo('hoy'); }}
           style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
@@ -92,6 +102,22 @@ export function FixtureTab() {
             color: seccion === 'semis' ? '#fff' : 'var(--text-muted)',
           }}>
           SEMIS
+        </button>
+        <button onClick={() => setSeccion('3er_puesto')}
+          style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            borderColor: seccion === '3er_puesto' ? 'var(--blue)' : 'var(--border)',
+            background: seccion === '3er_puesto' ? 'var(--blue)' : '#fff',
+            color: seccion === '3er_puesto' ? '#fff' : 'var(--text-muted)',
+          }}>
+          3ER PUESTO
+        </button>
+        <button onClick={() => setSeccion('final')}
+          style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            borderColor: seccion === 'final' ? 'var(--blue)' : 'var(--border)',
+            background: seccion === 'final' ? 'var(--blue)' : '#fff',
+            color: seccion === 'final' ? '#fff' : 'var(--text-muted)',
+          }}>
+          FINAL
         </button>
       </div>
 
@@ -165,6 +191,34 @@ export function FixtureTab() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
             {partidosSemis.map(p => <PartidoCard key={p.id} partido={p} />)}
+          </div>
+        </div>
+      )}
+
+      {/* 3er Puesto — lista directa */}
+      {seccion === '3er_puesto' && filtrados.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ background: 'var(--blue)', color: '#fff', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, padding: '3px 10px', borderRadius: 6 }}>3°</span>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text)' }}>TERCER PUESTO</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
+            {partidosTercero.map(p => <PartidoCard key={p.id} partido={p} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Final — lista directa */}
+      {seccion === 'final' && filtrados.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ background: 'var(--gold)', color: '#000', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, padding: '3px 10px', borderRadius: 6 }}>🏆</span>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text)' }}>FINAL</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 8 }}>
+            {partidosFinal.map(p => <PartidoCard key={p.id} partido={p} />)}
           </div>
         </div>
       )}
